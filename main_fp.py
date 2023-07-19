@@ -50,8 +50,8 @@ if __name__ == '__main__':
                 else:
                     action_probs = get_new_action_probs_from_Qs(iteration + 1, action_probs, np.array([Q_br]))
             elif config['variant'] == "omd":
-                y += config['temperature'] * Q_pi
-                action_probs = get_softmax_action_probs_from_Qs(np.array([y]), temperature=1)
+                y += Q_pi
+                action_probs = get_softmax_action_probs_from_Qs(np.array([y]), temperature=config['temperature'])
 
             np.save(config['exp_dir'] + f"action_probs.npy", action_probs)
             np.save(config['exp_dir'] + f"best_response.npy", Q_br)
