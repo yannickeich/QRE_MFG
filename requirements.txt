@@ -1,0 +1,8 @@
+gym
+matplotlib
+networkx
+numpy
+scipy
+tensorboard
+jax
+jaxlib
