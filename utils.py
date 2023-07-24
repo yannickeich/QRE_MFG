@@ -81,3 +81,46 @@ def get_softmax_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs, temper
     b = b / (np.sum(b, axis=1, keepdims=True))
     new_probs = b.reshape(Qs.shape).mean(0)
     return (old_probs * num_averages_yet + new_probs) / (num_averages_yet + 1)
+
+
+def value_based_forward(env, V_br):
+    mus = []
+    curr_mf = env.mu_0
+    mus.append(curr_mf)
+    for t in range(env.time_steps):
+        P_t = env.get_P(t, mus[t])
+        Q_t = env.get_R(t, mus[t])
+        if t < env.time_steps-1:
+            Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
+        a = Q_t.reshape((-1, Q_t.shape[-1]))
+        action_probs = np.zeros_like(a)
+        action_probs[np.arange(len(a)), a.argmax(1)] = 1
+        #action_probs = action_probs.reshape(Q_t.shape).mean(0)
+        xu = np.expand_dims(curr_mf, axis=(1,)) * action_probs
+        curr_mf = np.einsum('ijk,ji->k', P_t, xu)
+        mus.append(curr_mf)
+
+    return np.array(mus)
+
+def value_based_softmax_forward(env, V_br,temperature):
+    mus = []
+    curr_mf = env.mu_0
+    mus.append(curr_mf)
+    for t in range(env.time_steps):
+        P_t = env.get_P(t, mus[t])
+        Q_t = env.get_R(t, mus[t])
+        if t < env.time_steps-1:
+            Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
+
+        a = Q_t.reshape((-1, Q_t.shape[-1]))
+        a = a - a.max(1, keepdims=True)
+        b = np.exp(a / temperature)
+        b = b / (np.sum(b, axis=1, keepdims=True))
+        #b=b.reshape(Q_t.shape).mean(0)
+        action_probs = b
+
+        xu = np.expand_dims(curr_mf, axis=(1,)) * action_probs
+        curr_mf = np.einsum('ijk,ji->k', P_t, xu)
+        mus.append(curr_mf)
+
+    return np.array(mus)
