@@ -59,3 +59,10 @@ class FastMARLEnv(ABC):
     @abstractmethod
     def get_R(self, t, mu):
         pass  # Return array X x U of expected rewards for given mf
+
+    def final_R(self,mu):
+        """
+        Return the reward in the final time step, that is only state dependent.
+        This function can be overwritten in the specific examples, if not zero.
+        """
+        return np.zeros(self.observation_space.n)

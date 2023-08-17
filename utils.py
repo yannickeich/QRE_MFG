@@ -23,6 +23,7 @@ def get_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs):
 def find_best_response(env, mus):
     Qs = []
     V_t_next = np.zeros((env.observation_space.n, ))
+    V_t_next += env.final_R(mus[-1])
     for t in range(env.time_steps).__reversed__():
         P_t = env.get_P(t, mus[t])
         Q_t = env.get_R(t, mus[t]) + np.einsum('ijk,k->ji', P_t, V_t_next)
@@ -50,6 +51,7 @@ def get_curr_mf(env, action_probs):
 def eval_curr_reward(env, action_probs, mus):
     Qs = []
     V_t_next = np.zeros((env.observation_space.n, ))
+    V_t_next += env.final_R(mus[-1])
     for t in range(env.time_steps).__reversed__():
         P_t = env.get_P(t, mus[t])
         Q_t = env.get_R(t, mus[t]) \
