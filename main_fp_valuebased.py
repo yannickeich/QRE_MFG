@@ -20,15 +20,15 @@ if __name__ == '__main__':
     if config['variant'] == "omd":
         mus = get_curr_mf(env, action_probs)
         y = 0 * eval_curr_reward(env, action_probs, mus)[1]
-
-
+    #intial mu
+    mus = get_curr_mf(env, action_probs)
     """ Compute the MFG fixed point for all high degree agents """
     with open(config['exp_dir'] + f"stdout", "w", buffering=1) as fo:
         for iteration in range(config['fp_iterations']):
             if config['softmax']:
-                mus = value_based_softmax_forward(env, Q_br.max(axis=-1),temperature=config['temperature'])
+                mus = value_based_softmax_forward(env, np.concatenate((Q_br.max(axis=-1),env.final_R(mus[-1])[None])),temperature=config['temperature'])
             else:
-                mus = value_based_forward(env, Q_br.max(axis=-1))
+                mus = value_based_forward(env, np.concatenate((Q_br.max(axis=-1),env.final_R(mus[-1])[None])))
 
 
 

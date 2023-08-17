@@ -55,7 +55,7 @@ class LR(FastMARLEnv):
     def get_R(self, t, mu):
         R = np.zeros((self.observation_space.n, self.action_space.n))
 
-        R[0, :] -= mu[0]
+        R[0, :] -= 2*mu[0]
         R[2, :] -= mu[2]
 
         return R
@@ -63,7 +63,7 @@ class LR(FastMARLEnv):
     def final_R(self,mu):
         R = np.zeros(self.observation_space.n)
 
-        R[0] -= mu[0]
+        R[0] -= 2*mu[0]
         R[2] -= mu[2]
 
         return R

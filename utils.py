@@ -92,8 +92,8 @@ def value_based_forward(env, V_br):
     for t in range(env.time_steps):
         P_t = env.get_P(t, mus[t])
         Q_t = env.get_R(t, mus[t])
-        if t < env.time_steps-1:
-            Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
+
+        Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
         a = Q_t.reshape((-1, Q_t.shape[-1]))
         action_probs = np.zeros_like(a)
         action_probs[np.arange(len(a)), a.argmax(1)] = 1
@@ -111,8 +111,8 @@ def value_based_softmax_forward(env, V_br,temperature):
     for t in range(env.time_steps):
         P_t = env.get_P(t, mus[t])
         Q_t = env.get_R(t, mus[t])
-        if t < env.time_steps-1:
-            Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
+
+        Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
 
         a = Q_t.reshape((-1, Q_t.shape[-1]))
         a = a - a.max(1, keepdims=True)
