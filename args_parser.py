@@ -1,6 +1,7 @@
 import argparse
 
 from env.SIS import SIS
+from env.LR import LR
 
 
 def parse_args():
@@ -10,10 +11,10 @@ def parse_args():
     parser.add_argument('--id', type=int, help='experiment id', default=0)
 
     parser.add_argument("--gamma", type=float, default=0.99, help="Discount factor")
-    parser.add_argument("--softmax", action="store_true", default=False, help="Use softmax instead of argmax")
+    parser.add_argument("--softmax", action="store_true", default=True, help="Use softmax instead of argmax")
     parser.add_argument("--inf", action="store_true", default=False, help="infinite horizon")
-    parser.add_argument("--temperature", type=float, default=0.1, help="Softmax temperature")
-    parser.add_argument("--variant", default="fpi", choices=["fpi", "fp", "omd"])
+    parser.add_argument("--temperature", type=float, default=0.05, help="Softmax temperature")
+    parser.add_argument("--variant", default="fpi", choices=["fpi", "fp", "omd","boltzmann","q_omd","q_fp","rel_ent"])
 
     parsed, unknown = parser.parse_known_args()
     def isfloat(num):
@@ -53,6 +54,8 @@ def generate_config_from_kw(temperature=0.1, softmax=0, inf=False, **kwargs):
 
     if kwargs['game'] == 'SIS':
         kwargs['game'] = SIS
+    elif kwargs['game'] == 'LR':
+            kwargs['game'] = LR
     else:
         raise NotImplementedError
 

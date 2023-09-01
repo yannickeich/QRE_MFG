@@ -1,5 +1,6 @@
 import subprocess
 import time
+import numpy as np
 
 if __name__ == '__main__':
     import multiprocessing
@@ -9,13 +10,15 @@ if __name__ == '__main__':
     max_tasks = num_cores // cores_per_task
     child_processes = []
 
-    for variant in ["fpi", "fp", "omd",]:
+    for variant in ["rel_ent","boltzmann","q_fp"]:
         for game in ['SIS',]:
             p = subprocess.Popen(['python',
                                   './main_fp.py',
                                   f'--game={game}',
-                                  f'--fp_iterations={1000}',
+                                  f'--fp_iterations={2000}',
                                   f'--variant={variant}',
+                                  f'--temperature={0.07}',
+                                  f'--softmax',
                                   ])
             child_processes.append(p)
 

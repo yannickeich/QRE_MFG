@@ -14,7 +14,7 @@ if __name__ == '__main__':
         for game in ['LR',]:
             for temperature in np.linspace(0.01, 1.01, 11):
                 p = subprocess.Popen(['python',
-                                      './main_fp.py',
+                                      './main_fp_valuebased.py',
                                       f'--game={game}',
                                       f'--fp_iterations={100}',
                                       f'--variant={variant}',

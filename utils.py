@@ -34,6 +34,20 @@ def find_best_response(env, mus):
     out_Qs = np.array(Qs)
     return out_Qs
 
+def find_soft_response(env, mus,temperature=1.0):
+    Qs = []
+    V_t_next = np.zeros((env.observation_space.n, ))
+    V_t_next += env.final_R(mus[-1])
+    for t in range(env.time_steps).__reversed__():
+        P_t = env.get_P(t, mus[t])
+        Q_t = env.get_R(t, mus[t]) + np.einsum('ijk,k->ji', P_t, V_t_next)
+        V_t_next = temperature * np.log(np.exp(Q_t/temperature).sum(-1))
+        Qs.append(Q_t)
+
+    Qs.reverse()
+    out_Qs = np.array(Qs)
+    return out_Qs
+
 
 def get_curr_mf(env, action_probs):
     mus = []
@@ -82,7 +96,7 @@ def get_softmax_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs, temper
     b = np.exp(a / temperature)
     b = b / (np.sum(b, axis=1, keepdims=True))
     new_probs = b.reshape(Qs.shape).mean(0)
-    return (old_probs * num_averages_yet + new_probs) / (num_averages_yet + 1)
+    return (old_probs * 0.9 + 0.1 * new_probs) / (1)
 
 
 def value_based_forward(env, V_br):
