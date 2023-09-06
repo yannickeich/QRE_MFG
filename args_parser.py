@@ -2,6 +2,7 @@ import argparse
 
 from env.SIS import SIS
 from env.LR import LR
+from env.RandomMFG import RandomMFG
 
 
 def parse_args():
@@ -56,6 +57,8 @@ def generate_config_from_kw(temperature=0.1, softmax=0, inf=False, **kwargs):
         kwargs['game'] = SIS
     elif kwargs['game'] == 'LR':
             kwargs['game'] = LR
+    elif kwargs['game'] == 'random':
+        kwargs['game'] = RandomMFG
     else:
         raise NotImplementedError
 
