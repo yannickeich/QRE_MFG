@@ -8,13 +8,10 @@ class LR(FastMARLEnv):
     Models the Left Right game.
     """
 
-    def __init__(self, infection_rate: float = 0.81, recovery_rate: float = 0.3, time_steps: int = 1,
-                 initial_infection_prob: float = 0.1, cost_infection: float = 1, cost_action: float = 0.5,
+    def __init__(self, time_steps: int = 1,
+                 cost_action: float = 0.5,
                  num_agents: int = 100, **kwargs):
-        self.infection_rate = infection_rate
-        self.recovery_rate = recovery_rate
-        self.initial_infection_prob = initial_infection_prob
-        self.cost_infection = cost_infection
+
         self.cost_action = cost_action
 
         observation_space = Discrete(3)
