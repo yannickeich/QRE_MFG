@@ -9,10 +9,7 @@ class LR(FastMARLEnv):
     """
 
     def __init__(self, time_steps: int = 1,
-                 cost_action: float = 0.5,
                  num_agents: int = 100, **kwargs):
-
-        self.cost_action = cost_action
 
         observation_space = Discrete(3)
         action_space = Discrete(2)
