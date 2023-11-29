@@ -33,43 +33,54 @@ if __name__ == '__main__':
             v_1 = np.vdot(env.mu_0, Q_br.max(axis=-1)[0])
             v_curr_1 = np.vdot(env.mu_0, V_pi)
 
-            if iteration %100 ==0:
-                print(f"{config['exp_dir']} {iteration}: expl: {v_1 - v_curr_1}, ... br achieves {v_1} vs. {v_curr_1}")
-                fo.write(f"{config['exp_dir']} {iteration}: expl: {v_1 - v_curr_1}, ... br achieves {v_1} vs. {v_curr_1}")
-                fo.write('\n')
 
-                """ Compare Policies """
-                action_probs_new = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
-                print(np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max())
+            print(f"{config['exp_dir']} {iteration}: expl: {v_1 - v_curr_1}, ... br achieves {v_1} vs. {v_curr_1}")
+            fo.write(f"{config['exp_dir']} {iteration}: expl: {v_1 - v_curr_1}, ... br achieves {v_1} vs. {v_curr_1}")
+            fo.write('\n')
 
-            if iteration == 12000:
-                config['temperature'] = 0.02226
-            # if iteration == 4000:
-            #     config['temperature'] = 0.023
-            # if iteration == 6000:
-            #     config['temperature'] = 0.0225
+            """ Compare Policies """
+            action_probs_new = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
+            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max()}")
+            fo.write(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max()}")
+            fo.write('\n')
 
-            if config['variant'] == "boltzmann":
+            if config['variant'] == "BE_fpi":
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
-            elif config['variant'] == "rel_ent":
+            elif config['variant'] == "QRE_fpi":
+                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
+            elif config['variant'] == "RE_fpi":
                 Q_sr = find_soft_response(env,mus,temperature=config['temperature'])
-                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
-            elif config['variant'] == "fpi":
+                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
+            elif config['variant'] == "NE_fpi":
                 action_probs = get_action_probs_from_Qs(np.array([Q_br]))
-            elif config['variant'] == "q_fp":
+            elif config['variant'] == "BE_fp":
                 #mus_avg  = (iteration * mus_avg + mus)/(iteration+1)
                 mus_avg = 0.95 * mus_avg + 0.05 * mus
                 Q_br = find_best_response(env, mus_avg)
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
-            elif config['variant'] == "fp":
+            elif config['variant'] == "QRE_fp":
+                #mus_avg  = (iteration * mus_avg + mus)/(iteration+1)
+                mus_avg = 0.95 * mus_avg + 0.05 * mus
+                V_pi, Q_pi = eval_curr_reward(env, action_probs, mus_avg)
+                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
+            elif config['variant'] == "RE_fp":
+                #mus_avg  = (iteration * mus_avg + mus)/(iteration+1)
+                mus_avg = 0.95 * mus_avg + 0.05 * mus
+                Q_sr = find_soft_response(env, mus_avg,temperature=config['temperature'])
+                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
+            elif config['variant'] == "NE_fp":
                 mus_avg = 0.9 * mus_avg + 0.1 * mus
                 Q_br = find_best_response(env, mus_avg)
                 action_probs = get_action_probs_from_Qs(np.array([Q_br]))
-            elif config['variant'] == "q_omd":
+            elif config['variant'] == "BE_omd":
                 #y = (iteration * y + Q_br)/(iteration+1)
                 y = 0.9 * y + 0.1 *Q_br
                 action_probs = get_softmax_action_probs_from_Qs(np.array([y]), temperature=config['temperature'])
-            elif config['variant'] == "omd":
+            elif config['variant'] == "QRE_omd":
+                #y = (iteration * y + Q_br)/(iteration+1)
+                y = 0.9 * y + 0.1 * Q_pi
+                action_probs = get_softmax_action_probs_from_Qs(np.array([y]), temperature=config['temperature'])
+            elif config['variant'] == "NE_omd":
                 y += Q_pi
                 action_probs = get_softmax_action_probs_from_Qs(np.array([y]), temperature=config['temperature'])
             else:
@@ -77,3 +88,4 @@ if __name__ == '__main__':
 
             np.save(config['exp_dir'] + f"action_probs.npy", action_probs)
             np.save(config['exp_dir'] + f"best_response.npy", Q_br)
+            np.save(config['exp_dir'] + f"mean_field.npy", mus)

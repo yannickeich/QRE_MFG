@@ -62,7 +62,7 @@ def plot():
                 fi_lines = fi.readlines()
                 for line in fi_lines[:]:
                     fields = line.split(" ")
-                    if fields[2] == 'expl:':
+                    if fields[2]=='l1_distance:':
                         plot_vals.append(float(fields[3][:-1]))
 
             color = clist.__next__()['color']
@@ -74,7 +74,7 @@ def plot():
         # plt.title(game + " " + variant)
         plt.grid('on')
         plt.xlabel(r'Iterations $n$', fontsize=22)
-        plt.ylabel(r'$\Delta J$', fontsize=22)
+        plt.ylabel(r'$l_1$', fontsize=22)
         plt.xlim([0, len(plot_vals)-1])
         plt.xscale('symlog')
         # plt.yscale('symlog')
@@ -82,8 +82,8 @@ def plot():
     """ Finalize plot """
     plt.gcf().set_size_inches(12, 6.5)
     plt.tight_layout(w_pad=0.0)
-    plt.savefig(f'./figures/exploitability.pdf', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
-    plt.savefig(f'./figures/exploitability.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/l1_distance.pdf', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/l1_distance.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
     plt.show()
 
 
