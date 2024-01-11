@@ -11,10 +11,8 @@ if __name__ == '__main__':
 
     Q_0 = [np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))]
 
-    if config['softmax']:
-        action_probs = get_softmax_action_probs_from_Qs(np.array(Q_0), temperature=config['temperature'])
-    else:
-        action_probs = get_action_probs_from_Qs(np.array(Q_0))
+
+    action_probs = get_action_probs_from_Qs(np.array(Q_0))
     mus_avg = get_curr_mf(env, action_probs)
 
     y = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
@@ -43,6 +41,10 @@ if __name__ == '__main__':
             print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max()}")
             fo.write(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max()}")
             fo.write('\n')
+
+            # Test
+            Q_sr = find_soft_response(env, mus, temperature=config['temperature'])
+
 
             if config['variant'] == "BE_fpi":
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])

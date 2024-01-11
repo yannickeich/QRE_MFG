@@ -3,6 +3,9 @@ import argparse
 from env.SIS import SIS
 from env.LR import LR
 from env.RandomMFG import RandomMFG
+from env.RPS import RPS
+from env.A2_MDP import A2_MDP
+from env.A3_MDP import A3_MDP
 
 
 def parse_args():
@@ -12,7 +15,7 @@ def parse_args():
     parser.add_argument('--id', type=int, help='experiment id', default=0)
 
     parser.add_argument("--gamma", type=float, default=0.99, help="Discount factor")
-    parser.add_argument("--softmax", action="store_true", default=True, help="Use softmax instead of argmax")
+   # parser.add_argument("--softmax", action="store_true", default=True, help="Use softmax instead of argmax")
     parser.add_argument("--inf", action="store_true", default=False, help="infinite horizon")
     parser.add_argument("--temperature", type=float, default=0.05, help="Softmax temperature")
     parser.add_argument("--variant", default="fpi", choices=["NE_fpi", "NE_fp", "NE_omd","BE_fpi","BE_fp","BE_omd","RE_fpi","RE_fp","RE_omd","QRE_fpi","QRE_fp","QRE_omd"])
@@ -42,12 +45,11 @@ def generate_config(args):
     return generate_config_from_kw(**vars(args))
 
 
-def generate_config_from_kw(temperature=0.1, softmax=0, inf=False, **kwargs):
-    kwargs['temperature'], kwargs['softmax'], kwargs['inf'] = temperature, softmax, inf
+def generate_config_from_kw(temperature=0.1, inf=False, **kwargs):
+    kwargs['temperature'] = temperature
 
-    kwargs['exp_dir'] = "./results/%s_%s_%d_%d_%f_%d" \
-               % (kwargs['game'], kwargs['variant'], kwargs['fp_iterations'],
-                  kwargs['inf'], kwargs['temperature'], kwargs['softmax'])
+    kwargs['exp_dir'] = "./results/%s_%s_%d_%f" \
+               % (kwargs['game'], kwargs['variant'], kwargs['fp_iterations'], kwargs['temperature'])
     kwargs['exp_dir'] += f"/"
 
     from pathlib import Path
@@ -59,6 +61,12 @@ def generate_config_from_kw(temperature=0.1, softmax=0, inf=False, **kwargs):
             kwargs['game'] = LR
     elif kwargs['game'] == 'random':
         kwargs['game'] = RandomMFG
+    elif kwargs['game'] == 'RPS':
+            kwargs['game'] = RPS
+    elif kwargs['game'] == 'A2_MDP':
+            kwargs['game'] = A2_MDP
+    elif kwargs['game'] == 'A3_MDP':
+            kwargs['game'] = A3_MDP
     else:
         raise NotImplementedError
 
