@@ -83,7 +83,7 @@ def plot():
     i = 1
     skip_n = 1
 
-    games = ['A3_MDP',]
+    games = ['random',]
     n_actions = 3
     variants = ["BE_fp","RE_fp","QRE_fp"]
     # same configs as in experiment
@@ -117,7 +117,7 @@ def plot():
                 config = args_parser.generate_config_from_kw(game=game, variant=variant,temperature=temperature,fp_iterations=fp_iterations)
                 files = find('action_probs.npy', config['exp_dir'])
                 action_probs = np.load(files[0])
-                plot_values[i] = action_probs[0,2]
+                plot_values[i] = action_probs[0,0]
                 i+=1
 
 

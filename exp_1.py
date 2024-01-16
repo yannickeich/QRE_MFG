@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     for variant in["BE_fp","RE_fp","QRE_fp"]:
         for temperature in [0.1,0.2,0.3,0.5,0.7,1.,2.,3.,5.,7.,10.0]:
-            for game in ["A3_MDP"]:
+            for game in ["riskRPS"]:
                 p = subprocess.Popen(['python',
                                       './main_fp.py',
                                       f'--game={game}',

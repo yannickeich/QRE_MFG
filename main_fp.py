@@ -37,14 +37,18 @@ if __name__ == '__main__':
             fo.write('\n')
 
             """ Compare Policies """
-            action_probs_new = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
-            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max()}")
-            fo.write(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(action_probs_new - action_probs).sum(-1).sum(-1).max()}")
+            """Boltzmann L1-Distance """
+            BE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
+            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(BE_action_probs - action_probs).sum(-1).sum(-1).max()}")
+            fo.write(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(BE_action_probs - action_probs).sum(-1).sum(-1).max()}")
             fo.write('\n')
-
-            # Test
+            """QRE L1-Distance"""
+            QRE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
+            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(QRE_action_probs - action_probs).sum(-1).sum(-1).max()}")
+            """Relative Entropy L1-Distance"""
             Q_sr = find_soft_response(env, mus, temperature=config['temperature'])
-
+            RE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
+            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(RE_action_probs - action_probs).sum(-1).sum(-1).max()}")
 
             if config['variant'] == "BE_fpi":
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])

@@ -6,6 +6,7 @@ from env.RandomMFG import RandomMFG
 from env.RPS import RPS
 from env.A2_MDP import A2_MDP
 from env.A3_MDP import A3_MDP
+from env.riskRPS import riskRPS
 
 
 def parse_args():
@@ -18,7 +19,7 @@ def parse_args():
    # parser.add_argument("--softmax", action="store_true", default=True, help="Use softmax instead of argmax")
     parser.add_argument("--inf", action="store_true", default=False, help="infinite horizon")
     parser.add_argument("--temperature", type=float, default=0.05, help="Softmax temperature")
-    parser.add_argument("--variant", default="fpi", choices=["NE_fpi", "NE_fp", "NE_omd","BE_fpi","BE_fp","BE_omd","RE_fpi","RE_fp","RE_omd","QRE_fpi","QRE_fp","QRE_omd"])
+    parser.add_argument("--variant", default="QRE_fpi", choices=["NE_fpi", "NE_fp", "NE_omd","BE_fpi","BE_fp","BE_omd","RE_fpi","RE_fp","RE_omd","QRE_fpi","QRE_fp","QRE_omd"])
 
     parsed, unknown = parser.parse_known_args()
     def isfloat(num):
@@ -58,15 +59,17 @@ def generate_config_from_kw(temperature=0.1, inf=False, **kwargs):
     if kwargs['game'] == 'SIS':
         kwargs['game'] = SIS
     elif kwargs['game'] == 'LR':
-            kwargs['game'] = LR
+        kwargs['game'] = LR
     elif kwargs['game'] == 'random':
         kwargs['game'] = RandomMFG
     elif kwargs['game'] == 'RPS':
-            kwargs['game'] = RPS
+        kwargs['game'] = RPS
     elif kwargs['game'] == 'A2_MDP':
-            kwargs['game'] = A2_MDP
+        kwargs['game'] = A2_MDP
     elif kwargs['game'] == 'A3_MDP':
-            kwargs['game'] = A3_MDP
+        kwargs['game'] = A3_MDP
+    elif kwargs['game'] == 'riskRPS':
+        kwargs['game'] = riskRPS
     else:
         raise NotImplementedError
 

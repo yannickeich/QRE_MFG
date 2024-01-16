@@ -41,7 +41,7 @@ def find_soft_response(env, mus,temperature=1.0):
     for t in range(env.time_steps).__reversed__():
         P_t = env.get_P(t, mus[t])
         Q_t = env.get_R(t, mus[t]) + np.einsum('ijk,k->ji', P_t, V_t_next)
-        V_t_next = temperature * np.log(np.exp(Q_t/temperature).sum(-1))
+        V_t_next = Q_t.max(-1) + temperature * np.log(np.exp((Q_t-Q_t.max(-1)[...,None])/temperature).sum(-1))
         Qs.append(Q_t)
 
     Qs.reverse()
