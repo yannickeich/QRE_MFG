@@ -76,7 +76,7 @@ class A3_MDP(FastMARLEnv):
         R[1] = 0
         R[2] = 0
         R[3] = 0
-        R[4] = 10 *(1-mu[4])
+        R[4] = 100 *(1-mu[4])
 
         return R
 
@@ -87,6 +87,6 @@ class A3_MDP(FastMARLEnv):
         R[1] = 0
         R[2] = 0
         R[3] = 0
-        R[4] = 10 *(1-mu[4])
+        R[4] = 100 *(1-mu[4])
 
         return R

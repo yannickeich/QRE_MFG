@@ -13,8 +13,12 @@ if __name__ == '__main__':
 
 
     action_probs = get_action_probs_from_Qs(np.array(Q_0))
-    mus_avg = get_curr_mf(env, action_probs)
+    if (config['variant'] == "NE_fp") | (config['variant']== "QRE_fp"):
+        action_probs_avg = action_probs.copy()
 
+    mus_avg = get_curr_mf(env, action_probs)
+    #sum_action_probs = action_probs * mus_avg[:-1][...,None]
+    sum_action_probs = np.zeros_like(action_probs)
     y = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
 
     """ Compute the MFG fixed point for all high degree agents """
@@ -22,16 +26,28 @@ if __name__ == '__main__':
         for iteration in range(config['fp_iterations']):
             mus = get_curr_mf(env, action_probs)
 
+            """Evaluation"""
+            # IF FP: we have to compare the average policy against the best response to the meanfield induced by the average policy
+            if (config['variant'] == "NE_fp") | (config['variant']== "QRE_fp")|(config['variant']== "RE_fp")|(config['variant']== "BE_fp"):
+            #if (config['variant'] == "NE_fp"):
+                sum_action_probs = sum_action_probs + action_probs * mus[:-1][..., None]
+                action_probs_avg = sum_action_probs / sum_action_probs.sum(-1)[..., None]
+                action_probs_avg[np.isnan(action_probs_avg)] = 1 / env.action_space.n
+                action_probs_compare = action_probs_avg.copy()
+                mu_compare = get_curr_mf(env, action_probs_compare)
+            else:
+                action_probs_compare = action_probs.copy()
+                mu_compare = mus.copy()
+
             """ Evaluate current policy """
-            V_pi, Q_pi = eval_curr_reward(env, action_probs, mus)
+            V_pi, Q_pi = eval_curr_reward(env, action_probs_compare, mu_compare)
 
             """ Evaluate current best response against current average policy """
-            """ Exploitability """
-            Q_br = find_best_response(env, mus)
+            Q_br = find_best_response(env, mu_compare)
             v_1 = np.vdot(env.mu_0, Q_br.max(axis=-1)[0])
             v_curr_1 = np.vdot(env.mu_0, V_pi)
 
-
+            """ Exploitability """
             print(f"{config['exp_dir']} {iteration}: expl: {v_1 - v_curr_1}, ... br achieves {v_1} vs. {v_curr_1}")
             fo.write(f"{config['exp_dir']} {iteration}: expl: {v_1 - v_curr_1}, ... br achieves {v_1} vs. {v_curr_1}")
             fo.write('\n')
@@ -39,16 +55,22 @@ if __name__ == '__main__':
             """ Compare Policies """
             """Boltzmann L1-Distance """
             BE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
-            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(BE_action_probs - action_probs).sum(-1).sum(-1).max()}")
-            fo.write(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(BE_action_probs - action_probs).sum(-1).sum(-1).max()}")
+            print(f"{config['exp_dir']} {iteration}: BE_l1_distance: {np.abs(BE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
+            fo.write(f"{config['exp_dir']} {iteration}: BE_l1_distance: {np.abs(BE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write('\n')
+
             """QRE L1-Distance"""
             QRE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
-            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(QRE_action_probs - action_probs).sum(-1).sum(-1).max()}")
+            print(f"{config['exp_dir']} {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
+            fo.write(f"{config['exp_dir']} {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
+            fo.write('\n')
+
             """Relative Entropy L1-Distance"""
             Q_sr = find_soft_response(env, mus, temperature=config['temperature'])
             RE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
-            print(f"{config['exp_dir']} {iteration}: l1_distance: {np.abs(RE_action_probs - action_probs).sum(-1).sum(-1).max()}")
+            print(f"{config['exp_dir']} {iteration}: RE_l1_distance: {np.abs(RE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
+            fo.write(f"{config['exp_dir']} {iteration}: RE_l1_distance: {np.abs(RE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
+            fo.write("\n")
 
             if config['variant'] == "BE_fpi":
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
@@ -65,7 +87,12 @@ if __name__ == '__main__':
                 Q_br = find_best_response(env, mus_avg)
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
             elif config['variant'] == "QRE_fp":
-                #mus_avg  = (iteration * mus_avg + mus)/(iteration+1)
+                mus_avg  = (iteration * mus_avg + mus)/(iteration+1)
+                #mus_avg = 0.95 * mus_avg + 0.05 * mus
+                V_pi, Q_pi = eval_curr_reward(env, action_probs, mus_avg)
+                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
+            elif config['variant'] == "expQRE_fp":
+
                 mus_avg = 0.95 * mus_avg + 0.05 * mus
                 V_pi, Q_pi = eval_curr_reward(env, action_probs, mus_avg)
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
@@ -75,7 +102,8 @@ if __name__ == '__main__':
                 Q_sr = find_soft_response(env, mus_avg,temperature=config['temperature'])
                 action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
             elif config['variant'] == "NE_fp":
-                mus_avg = 0.9 * mus_avg + 0.1 * mus
+                #mus_avg = 0.9 * mus_avg + 0.1 * mus
+                #mus_avg = iteration/(iteration+1) * mus_avg +1/(iteration+1) * mus
                 Q_br = find_best_response(env, mus_avg)
                 action_probs = get_action_probs_from_Qs(np.array([Q_br]))
             elif config['variant'] == "BE_omd":

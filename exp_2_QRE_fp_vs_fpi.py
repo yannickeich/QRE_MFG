@@ -10,20 +10,20 @@ if __name__ == '__main__':
     max_tasks = num_cores // cores_per_task
     child_processes = []
 
-    for variant in ["fpi",]:
-        for game in ['LR',]:
-            for temperature in np.linspace(0.01, 1.01, 11):
+    for variant in["QRE_fp","QRE_fpi","expQRE_fp"]:
+        for temperature in [1.0,0.01,0.0001]:
+        # for temperature in [0.1,0.2,0.3,0.5,0.7,1.,2.,3.,5.,7.,10.0]:
+            for game in ["random"]:
                 p = subprocess.Popen(['python',
                                       './main_fp.py',
                                       f'--game={game}',
-                                      f'--fp_iterations={100}',
+                                      f'--fp_iterations={10000}',
                                       f'--variant={variant}',
                                       f'--temperature={temperature}',
-                                      f'--softmax',
                                       ])
                 child_processes.append(p)
 
-                time.sleep(3)
+                #time.sleep(1)
 
                 while len(child_processes) >= max_tasks:
                     for p in list(child_processes):

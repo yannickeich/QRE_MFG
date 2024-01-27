@@ -2,7 +2,7 @@ import numpy as np
 from gym.spaces import Discrete
 from env.fast_marl import FastMARLEnv
 
-np.random.seed(1002)
+np.random.seed(1007)
 class RandomMFG(FastMARLEnv):
     """
     Models the Left Right game.
@@ -50,9 +50,10 @@ class RandomMFG(FastMARLEnv):
 
     def get_R(self, t, mu):
         R = self.R.copy()
-        R += -np.log(mu)[:,None]
+        R -= np.log(mu)[:,None]
         return R
 
     def final_R(self,mu):
         R = np.zeros(self.observation_space.n)
+        R -= np.log(mu)
         return R
