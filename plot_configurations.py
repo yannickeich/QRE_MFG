@@ -10,7 +10,7 @@ params = {'axes.labelsize': fontsize,  # fontsize for x and y labels (was 10)
           'ytick.labelsize': fontsize,
           'font.family': 'serif',
           'font.serif': ['Times New Roman'],
-          'lines.linewidth': 0.5,  # was 2.5
+          'lines.linewidth': 1.0,  # was 2.5
           'axes.linewidth': 1,
           'axes.grid': False,
           'grid.linewidth': 0.5,

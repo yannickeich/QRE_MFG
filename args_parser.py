@@ -19,8 +19,7 @@ def parse_args():
    # parser.add_argument("--softmax", action="store_true", default=True, help="Use softmax instead of argmax")
     parser.add_argument("--inf", action="store_true", default=False, help="infinite horizon")
     parser.add_argument("--temperature", type=float, default=0.05, help="Softmax temperature")
-    parser.add_argument("--variant", default="QRE_fpi", choices=["NE_fpi", "NE_fp", "NE_omd","BE_fpi","BE_fp","BE_omd","RE_fpi","RE_fp","RE_omd","QRE_fpi","QRE_fp","expQRE_fp","QRE_omd"])
-
+    parser.add_argument("--variant", default="QRE_fpi", choices=["NE_fpi", "NE_fp", "NE_omd","BE_fpi","BE_fp","BE_omd","RE_fpi","RE_fp","RE_omd","QRE_fpi","QRE_fp","expQRE_fp","expRE_fp","expBE_fp","expNE_fp","QRE_omd"])
     parsed, unknown = parser.parse_known_args()
     def isfloat(num):
         try:

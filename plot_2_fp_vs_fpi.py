@@ -72,11 +72,11 @@ def plot():
                 subplot.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
                              label=variant)
 
-        lgd1 = plt.legend(loc="lower left")
+        #lgd1 = plt.legend(loc="lower left")
         # plt.title(game + " " + variant)
         plt.grid('on')
-        plt.xlabel(r'Iterations $n$')
-        plt.ylabel(r'$\Delta L_1^{\mathrm{QRE}}(\pi)$')
+        plt.xlabel(r'Iterations $k$')
+        plt.ylabel(r'$\Delta \mathrm{QRE}(\pi)$')
         plt.xlim([0, len(plot_vals)-1])
         plt.xscale('symlog')
         # plt.yscale('symlog')
@@ -84,8 +84,8 @@ def plot():
     """ Finalize plot """
     plt.gcf().set_size_inches(3.25, 1.5)
     plt.tight_layout(w_pad=0.0)
-    plt.savefig(f'./figures/fp_vs_fpi.pdf', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
-    #plt.savefig(f'./figures/fp_vs_fpi_withoutlegend.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+    #plt.savefig(f'./figures/fp_vs_fpi.pdf', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/fp_vs_fpi_withoutlegend.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
 
     #plt.savefig(f'./figures/fp_vs_fpi.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
     plt.show()

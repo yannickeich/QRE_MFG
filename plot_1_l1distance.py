@@ -29,11 +29,11 @@ def plot():
     games = ['random',]
     variants =  ["NE_fp","QRE_fpi","RE_fpi","BE_fpi"]
     stationary = False
-    temperature = 0.1
+    temperature = 1.0
     iterations = 1000
 
     for game in games:
-        clist = itertools.cycle(cycler(color='rbgcmyk'))
+        clist = itertools.cycle(cycler('color',['purple','blue','red','green']))
         linestyle_cycler = itertools.cycle(cycler('linestyle', ['-', '--', ':', '-.']))
         subplot = plt.subplot(1, len(games), i)
         # subplot.annotate('(' + string.ascii_lowercase[i - 1] + ')',
@@ -59,19 +59,20 @@ def plot():
                 fi_lines = fi.readlines()
                 for line in fi_lines[:]:
                     fields = line.split(" ")
-                    if fields[2]=='QRE_l1_distance:':
+                    if fields[2]=='BE_l1_distance:':
                         plot_vals.append(float(fields[3][:-1]))
 
             color = clist.__next__()['color']
             linestyle = linestyle_cycler.__next__()['linestyle']
             subplot.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
-                         label=variant, linewidth=0.5)
+                         label=variant)
 
-        lgd1 = plt.legend(loc="lower left")
+
+        #lgd1 = plt.legend(loc="lower left")
         # plt.title(game + " " + variant)
         plt.grid('on')
-        plt.xlabel(r'Iterations $n$')
-        plt.ylabel(r'$\Delta L_1^{\mathrm{QRE}}(\pi)$')
+        plt.xlabel(r'Iterations $k$')
+        plt.ylabel(r'$\Delta \mathrm{BE}(\pi)$')
         plt.xlim([0, len(plot_vals)-1])
         plt.xscale('symlog')
         # plt.yscale('symlog')
@@ -79,10 +80,10 @@ def plot():
     """ Finalize plot """
     plt.gcf().set_size_inches(3.25, 1.5)
     plt.tight_layout(w_pad=0.0)
-    plt.savefig(f'./figures/QRE_l1_distance.pdf', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
-    #plt.savefig(f'./figures/QRE_l1_distance_without_legend.pdf',  bbox_inches='tight', transparent=True, pad_inches=0)
+    #plt.savefig(f'./figures/QRE_l1_distance.pdf', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/BE_l1_distance_without_legend.pdf',  bbox_inches='tight', transparent=True, pad_inches=0)
 
-    plt.savefig(f'./figures/QRE_l1_distance.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
+    #plt.savefig(f'./figures/QRE_l1_distance.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
     plt.show()
 
 
