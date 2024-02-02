@@ -1,9 +1,0 @@
-            # elif (config['variant'] == "expNE_fp") | (config['variant']== "expQRE_fp")|(config['variant']== "expRE_fp")|(config['variant']== "expBE_fp"):
-            #     if iteration ==0:
-            #         sum_action_probs = action_probs * mus[:-1][..., None]
-            #     else:
-            #         sum_action_probs = sum_action_probs * beta + (1-beta)*action_probs * mus[:-1][..., None]
-            #     action_probs_avg = sum_action_probs / sum_action_probs.sum(-1)[..., None]
-            #     action_probs_avg[np.isnan(action_probs_avg)] = 1 / env.action_space.n
-            #     action_probs_compare = action_probs_avg.copy()
-            #     mu_compare = get_curr_mf(env, action_probs_compare)
