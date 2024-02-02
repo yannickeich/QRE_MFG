@@ -8,65 +8,63 @@ import matplotlib.pyplot as plt
 from cycler import cycler
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import args_parser
-from ternary_diagram import TernaryDiagram
-td = TernaryDiagram(["Rock","Paper","Scissors"])
 
-# def projectSimplex(points):
-#     """
-#     Project probabilities on the 3-simplex to a 2D triangle
-#
-#     N points are given as N x 3 array
-#     """
-#     # Convert points one at a time
-#     tripts = np.zeros((points.shape[0], 2))
-#     for idx in range(points.shape[0]):
-#         # Init to triangle centroid
-#         x = 1.0 / 2
-#         y = 1.0 / (2 * np.sqrt(3))
-#         # Vector 1 - bisect out of lower left vertex
-#         p1 = points[idx, 0]
-#         x = x - (1.0 / np.sqrt(3)) * p1 * np.cos(np.pi / 6)
-#         y = y - (1.0 / np.sqrt(3)) * p1 * np.sin(np.pi / 6)
-#         # Vector 2 - bisect out of lower right vertex
-#         p2 = points[idx, 1]
-#         x = x + (1.0 / np.sqrt(3)) * p2 * np.cos(np.pi / 6)
-#         y = y - (1.0 / np.sqrt(3)) * p2 * np.sin(np.pi / 6)
-#         # Vector 3 - bisect out of top vertex
-#         p3 = points[idx, 2]
-#         y = y + (1.0 / np.sqrt(3) * p3)
-#
-#         tripts[idx, :] = (x, y)
-#
-#     return tripts
+def projectSimplex(points):
+    """
+    Project probabilities on the 3-simplex to a 2D triangle
 
-#
-# def projectSimplex_vector(points):
-#     """
-#     Project probabilities on the 3-simplex to a 2D triangle
-#
-#     N points are given as N x 3 array
-#     """
-#     # Convert points one at a time
-#     tripts = np.zeros((*points.shape[:-1], 2))
-#
-#     # Init to triangle centroid
-#     x = 1.0 / 2
-#     y = 1.0 / (2 * np.sqrt(3))
-#     # Vector 1 - bisect out of lower left vertex
-#     p1 = points[..., 0]
-#     x = x - (1.0 / np.sqrt(3)) * p1 * np.cos(np.pi / 6)
-#     y = y - (1.0 / np.sqrt(3)) * p1 * np.sin(np.pi / 6)
-#     # Vector 2 - bisect out of lower right vertex
-#     p2 = points[..., 1]
-#     x = x + (1.0 / np.sqrt(3)) * p2 * np.cos(np.pi / 6)
-#     y = y - (1.0 / np.sqrt(3)) * p2 * np.sin(np.pi / 6)
-#     # Vector 3 - bisect out of top vertex
-#     p3 = points[..., 2]
-#     y = y + (1.0 / np.sqrt(3) * p3)
-#
-#     tripts[..., :] = np.concatenate((x[...,None],y[...,None]),axis=-1)
-#
-#     return tripts
+    N points are given as N x 3 array
+    """
+    # Convert points one at a time
+    tripts = np.zeros((points.shape[0], 2))
+    for idx in range(points.shape[0]):
+        # Init to triangle centroid
+        x = 1.0 / 2
+        y = 1.0 / (2 * np.sqrt(3))
+        # Vector 1 - bisect out of lower left vertex
+        p1 = points[idx, 0]
+        x = x - (1.0 / np.sqrt(3)) * p1 * np.cos(np.pi / 6)
+        y = y - (1.0 / np.sqrt(3)) * p1 * np.sin(np.pi / 6)
+        # Vector 2 - bisect out of lower right vertex
+        p2 = points[idx, 1]
+        x = x + (1.0 / np.sqrt(3)) * p2 * np.cos(np.pi / 6)
+        y = y - (1.0 / np.sqrt(3)) * p2 * np.sin(np.pi / 6)
+        # Vector 3 - bisect out of top vertex
+        p3 = points[idx, 2]
+        y = y + (1.0 / np.sqrt(3) * p3)
+
+        tripts[idx, :] = (x, y)
+
+    return tripts
+
+
+def projectSimplex_vector(points):
+    """
+    Project probabilities on the 3-simplex to a 2D triangle
+
+    N points are given as N x 3 array
+    """
+    # Convert points one at a time
+    tripts = np.zeros((*points.shape[:-1], 2))
+
+    # Init to triangle centroid
+    x = 1.0 / 2
+    y = 1.0 / (2 * np.sqrt(3))
+    # Vector 1 - bisect out of lower left vertex
+    p1 = points[..., 0]
+    x = x - (1.0 / np.sqrt(3)) * p1 * np.cos(np.pi / 6)
+    y = y - (1.0 / np.sqrt(3)) * p1 * np.sin(np.pi / 6)
+    # Vector 2 - bisect out of lower right vertex
+    p2 = points[..., 1]
+    x = x + (1.0 / np.sqrt(3)) * p2 * np.cos(np.pi / 6)
+    y = y - (1.0 / np.sqrt(3)) * p2 * np.sin(np.pi / 6)
+    # Vector 3 - bisect out of top vertex
+    p3 = points[..., 2]
+    y = y + (1.0 / np.sqrt(3) * p3)
+
+    tripts[..., :] = np.concatenate((x[...,None],y[...,None]),axis=-1)
+
+    return tripts
 
 def find(pattern, path):
     result = []
@@ -76,33 +74,33 @@ def find(pattern, path):
                 result.append(os.path.join(root, name))
     return result
 
-# def simplex_grid(axes):
-#
-#     lin_space = np.linspace(0.1,0.9,9)
-#     flipped_lin_space = np.flip(lin_space)
-#     #Make lines from bottom line (action_3 = 0) to right line (action_1=0)
-#     for i in range(len(lin_space)):
-#         point1 = np.array([flipped_lin_space[i],lin_space[i],0])
-#         point2 = np.array([0, lin_space[i], flipped_lin_space[i]])
-#         points  = np.array([point1,point2])
-#         projected = projectSimplex_vector(points)
-#         axes.plot(projected[:,0],projected[:,1],color='gray',alpha=0.25)
-#
-#     #Make lines from left line (action_2 = 0) to right line (action_1=0)
-#     for i in range(len(lin_space)):
-#         point1 = np.array([lin_space[i],0,flipped_lin_space[i]])
-#         point2 = np.array([0, lin_space[i], flipped_lin_space[i]])
-#         points  = np.array([point1,point2])
-#         projected = projectSimplex_vector(points)
-#         axes.plot(projected[:,0],projected[:,1],color='gray',alpha=0.25)
-#
-#     #Make lines from bottom line (action_3 = 0) to left line (action_2=0)
-#     for i in range(len(lin_space)):
-#         point1 = np.array([flipped_lin_space[i],lin_space[i],0])
-#         point2 = np.array([flipped_lin_space[i],0,lin_space[i]])
-#         points  = np.array([point1,point2])
-#         projected = projectSimplex_vector(points)
-#         axes.plot(projected[:,0],projected[:,1],color='gray',alpha=0.25)
+def simplex_grid(axes):
+
+    lin_space = np.linspace(0.1,0.9,9)
+    flipped_lin_space = np.flip(lin_space)
+    #Make lines from bottom line (action_3 = 0) to right line (action_1=0)
+    for i in range(len(lin_space)):
+        point1 = np.array([flipped_lin_space[i],lin_space[i],0])
+        point2 = np.array([0, lin_space[i], flipped_lin_space[i]])
+        points  = np.array([point1,point2])
+        projected = projectSimplex_vector(points)
+        axes.plot(projected[:,0],projected[:,1],color='gray',alpha=0.25)
+
+    #Make lines from left line (action_2 = 0) to right line (action_1=0)
+    for i in range(len(lin_space)):
+        point1 = np.array([lin_space[i],0,flipped_lin_space[i]])
+        point2 = np.array([0, lin_space[i], flipped_lin_space[i]])
+        points  = np.array([point1,point2])
+        projected = projectSimplex_vector(points)
+        axes.plot(projected[:,0],projected[:,1],color='gray',alpha=0.25)
+
+    #Make lines from bottom line (action_3 = 0) to left line (action_2=0)
+    for i in range(len(lin_space)):
+        point1 = np.array([flipped_lin_space[i],lin_space[i],0])
+        point2 = np.array([flipped_lin_space[i],0,lin_space[i]])
+        points  = np.array([point1,point2])
+        projected = projectSimplex_vector(points)
+        axes.plot(projected[:,0],projected[:,1],color='gray',alpha=0.25)
 
 def plot():
 
@@ -119,7 +117,7 @@ def plot():
 
     games = ['RPS',]
     n_actions = 3
-    variants = ["RE_fp","QRE_fp","BE_fp"]
+    variants = ["expRE_fp","expQRE_fp","expBE_fp"]
 
     # same configs as in experiment
     temperature_list  = np.exp(np.linspace(-0.5,4.5,50))
@@ -130,7 +128,7 @@ def plot():
         clist = itertools.cycle(cycler(color='rbgcmyk'))
         linestyle_cycler = itertools.cycle(cycler('linestyle', ['-', '--', ':', '-.']))
         marker_cycler = itertools.cycle(cycler('marker',['.','+','x']))
-        # subplot = plt.subplot(1, len(games), i)
+        subplot = plt.subplot(1, len(games), i)
         # subplot.annotate('(' + string.ascii_lowercase[i - 1] + ')',
         #                  (0, 0),
         #                  xytext=(10, +32),
@@ -144,19 +142,19 @@ def plot():
         # subplot.text(-0.01, 1.06, '(' + string.ascii_lowercase[i - 1] + ')', transform=subplot.transAxes, weight='bold')
         i += 1
 
-        # Draw the triangle
-        # simplex = matplotlib.lines.Line2D([0, 0.5, 1.0, 0], [0, np.sqrt(3 / 4), 0, 0],color='black',linewidth = 0.5)  # xcoords, ycoords
-        # subplot.add_line(simplex)
-        # subplot.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-        # subplot.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-        # simplex_grid(subplot)
-        #
-        # # Leave some buffer around the triangle for vertex labels
-        # subplot.set_xlim(0.0, 1.0)
-        # subplot.set_ylim(0.0, 1.0)
-        # subplot.set_aspect('equal')
+        #Draw the triangle
+        simplex = matplotlib.lines.Line2D([0, 0.5, 1.0, 0], [0, np.sqrt(3 / 4), 0, 0],color='black',linewidth = 0.5)  # xcoords, ycoords
+        subplot.add_line(simplex)
+        subplot.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+        subplot.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+        simplex_grid(subplot)
 
-        #norm = plt.Normalize(temperature_list[0],temperature_list[-1])
+        # Leave some buffer around the triangle for vertex labels
+        subplot.set_xlim(0.0, 1.0)
+        subplot.set_ylim(0.0, 1.0)
+        subplot.set_aspect('equal')
+
+
 
         # Create a second plot (inset) that zooms in on the interesting area
         #axins = subplot.inset_axes([1.0,0.0,0.4,0.4],aspect='equal')
@@ -186,15 +184,15 @@ def plot():
                 config = args_parser.generate_config_from_kw(game=game, variant=variant,temperature=temperature,fp_iterations=fp_iterations)
                 files = find('action_probs.npy', config['exp_dir'])
                 action_probs = np.load(files[0])
-                plot_values[i,j] = np.roll(action_probs[0,0],axis=-1,shift=1)
+                plot_values[i,j] = action_probs[0,0]
 
-            td.ax.clear
+
             color = clist.__next__()['color']
             linestyle = linestyle_cycler.__next__()['linestyle']
             marker = marker_cycler.__next__()['marker']
 
             # Project points to 2d simplex and draw
-            # projected = projectSimplex_vector(plot_values)
+            projected = projectSimplex_vector(plot_values)
 
             #Scatter
             #subplot.scatter(projected[:, 0], projected[:, 1], c=np.log(temperature_list), cmap='viridis',marker=marker)
@@ -207,9 +205,9 @@ def plot():
             # lc.set_linewidth(2)
             # lc.set_label(variant)
             # line = subplot.add_collection(lc)
-            #subplot.plot(projected[i,:, 0], projected[i,:, 1],linestyle=linestyle,color=color,label= variant,alpha=0.5,linewidth=2)
-            td.plot(plot_values[i], linestyle=linestyle, color=color, label=variant,
-                         alpha=0.5, linewidth=2)
+            subplot.plot(projected[i,:, 0], projected[i,:, 1],linestyle=linestyle,color=color,label= variant,alpha=0.5,linewidth=2)
+            #td.plot(plot_values[i], linestyle=linestyle, color=color, label=variant,
+            #             alpha=0.5, linewidth=2)
 
             #axins.plot(projected[:, 0], projected[:, 1],linestyle=linestyle,color=color,alpha=0.5,linewidth=2)
         #plt.gcf().colorbar(line,ax=subplot)
@@ -233,8 +231,8 @@ def plot():
     """ Finalize plot """
     #plt.gcf().set_size_inches(10, 8)
     plt.tight_layout(w_pad=0.0)
-    plt.savefig(f'./figures/simplex.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
-    plt.savefig(f'./figures/simplex.png', bbox_inches='tight', transparent=True, pad_inches=0)
+   # plt.savefig(f'./figures/simplex.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+   # plt.savefig(f'./figures/simplex.png', bbox_inches='tight', transparent=True, pad_inches=0)
     plt.show()
 
 

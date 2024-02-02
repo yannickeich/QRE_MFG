@@ -9,18 +9,15 @@ if __name__ == '__main__':
     config = args_parser.parse_config()
     env: FastMARLEnv = config['game'](**config)
 
+    #Initial
     Q_0 = [np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))]
-
-
     action_probs = get_action_probs_from_Qs(np.array(Q_0))
-    if (config['variant'] == "NE_fp") | (config['variant']== "QRE_fp"):
-        action_probs_avg = action_probs.copy()
-        action_probs_avg2 = action_probs.copy()
 
-    mus_avg = get_curr_mf(env, action_probs)
-    #sum_action_probs = action_probs * mus_avg[:-1][...,None]
+    #For FP
     sum_action_probs = np.zeros_like(action_probs)
-    sum_action_probs2 = np.zeros_like(action_probs)
+    mus_avg = get_curr_mf(env, action_probs)
+
+    #For OMD
     y = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
 
     beta = 0.95
@@ -33,25 +30,11 @@ if __name__ == '__main__':
             """Evaluation"""
             # IF FP: we have to compare the average policy against the best response to the meanfield induced by the average policy
             if (config['variant'] == "NE_fp") | (config['variant']== "QRE_fp")|(config['variant']== "RE_fp")|(config['variant']== "BE_fp"):
-            #if (config['variant'] == "NE_fp"):
                 sum_action_probs = (iteration * sum_action_probs + action_probs * mus[:-1][..., None])/(iteration+1)
                 action_probs_avg = sum_action_probs/sum_action_probs.sum(-1)[...,None]
                 action_probs_avg[np.isnan(action_probs_avg)] = 1 / env.action_space.n
-
-                # sum_action_probs = sum_action_probs + action_probs * mus[:-1][..., None]
-                # action_probs_avg = sum_action_probs / sum_action_probs.sum(-1)[..., None]
-                # action_probs_avg[np.isnan(action_probs_avg)] = 1 / env.action_space.n
                 action_probs_compare = action_probs_avg.copy()
                 mu_compare = get_curr_mf(env, action_probs_compare)
-            # elif (config['variant'] == "expNE_fp") | (config['variant']== "expQRE_fp")|(config['variant']== "expRE_fp")|(config['variant']== "expBE_fp"):
-            #     if iteration ==0:
-            #         sum_action_probs = action_probs * mus[:-1][..., None]
-            #     else:
-            #         sum_action_probs = sum_action_probs * beta + (1-beta)*action_probs * mus[:-1][..., None]
-            #     action_probs_avg = sum_action_probs / sum_action_probs.sum(-1)[..., None]
-            #     action_probs_avg[np.isnan(action_probs_avg)] = 1 / env.action_space.n
-            #     action_probs_compare = action_probs_avg.copy()
-            #     mu_compare = get_curr_mf(env, action_probs_compare)
 
             else:
                 action_probs_compare = action_probs.copy()

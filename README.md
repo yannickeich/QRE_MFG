@@ -1,4 +1,4 @@
-# Simple Mean Field Games
+# DTMFGs
 
 ### Install Python packages in venv
 ```
@@ -8,13 +8,13 @@ pip install -r requirements.txt
 ```
 
 ### Run example
-Run a simple example, i.e. solving SIS problem for fixed-point iteration (FPI), fictitious play (FP) and online mirror descent (OMD).
+Run a example, i.e. solving random problem with GFPI for different equilibria.
 ```
-python exp_1.py
+python exp_1_gfpi.py
 ```
 
 ### Plot example exploitabilities
-Plot the simple example's exploitabilities and trajectories. For generated figures, see the figures folder.
+Plot the example's exploitabilities For generated figures, see the figures folder. (The "figures" folder needs to be created first)
 ```
 python plot_1_exploitability.py
 ```
@@ -22,5 +22,5 @@ python plot_1_exploitability.py
 ### Run custom experiments
 Options can be found in args_parser.
 ```
-python main_fp.py --game=SIS --variant=fp --softmax --temperature=0.01
+python main_fp.py --game=random --variant=QRE_fp  --temperature=0.1
 ```

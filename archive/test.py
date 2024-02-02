@@ -66,6 +66,6 @@ if __name__ == '__main__':
     plt.gcf().set_size_inches(10, 7)
     plt.tight_layout()
     from pathlib import Path
-    Path(f"./figures/").mkdir(parents=True, exist_ok=True)
+    Path(f"../figures/").mkdir(parents=True, exist_ok=True)
     plt.savefig(f"./figures/%s_%s_%d_%d_%f_%d.png" % (config['game'].__name__, config['variant'], config['fp_iterations'],
                   config['inf'], config['temperature'], config['softmax']), bbox_inches='tight', transparent=True, pad_inches=0)
