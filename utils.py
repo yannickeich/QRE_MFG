@@ -20,6 +20,20 @@ def get_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs):
     return (old_probs * num_averages_yet + new_probs) / (num_averages_yet + 1)
 
 
+def find_best_lookahaead_response(env, mus, lookahead):
+    Qs = []
+
+    for t in range(env.time_steps):
+        V_t_next = np.zeros((env.observation_space.n,))
+        for tau in range(lookahead).__reversed__():
+            if t + tau < env.time_steps:
+                P_t_tau = env.get_P(t+tau, mus[t+tau])
+                Q_t_tau = env.get_R(t+tau, mus[t+tau]) + np.einsum('ijk,k->ji', P_t_tau, V_t_next)
+                V_t_next = np.max(Q_t_tau,axis = -1)
+        Qs.append(Q_t_tau)
+    out_Qs = np.array(Qs)
+    return out_Qs
+
 def find_best_response(env, mus):
     Qs = []
     V_t_next = np.zeros((env.observation_space.n, ))
@@ -60,6 +74,23 @@ def get_curr_mf(env, action_probs):
         mus.append(curr_mf)
 
     return np.array(mus)
+
+
+def eval_curr_reward_lookahead(env, action_probs, mus,lookahead):
+    Qs = []
+    for t in range(env.time_steps):
+        V_t_next = np.zeros((env.observation_space.n, ))
+        for tau in range(lookahead).__reversed__():
+            if t + tau < env.time_steps:
+                P_t = env.get_P(t+tau, mus[t+tau])
+                Q_t = env.get_R(t+tau, mus[t+tau]) \
+                      + np.einsum('ijk,k->ji', P_t, V_t_next)
+                V_t_next = np.sum(action_probs[t+tau] * Q_t, axis=-1)
+
+        Qs.append(Q_t)
+
+    out_Qs = np.array(Qs)
+    return out_Qs
 
 
 def eval_curr_reward(env, action_probs, mus):
