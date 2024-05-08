@@ -20,7 +20,8 @@ def get_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs):
     return (old_probs * num_averages_yet + new_probs) / (num_averages_yet + 1)
 
 
-def find_best_lookahaead_response(env, mus, lookahead):
+def find_best_lookahead_response(env, mus, lookahead):
+    #TODO for now implemented without final reward!
     Qs = []
 
     for t in range(env.time_steps):
@@ -45,6 +46,18 @@ def find_best_response(env, mus):
         Qs.append(Q_t)
 
     Qs.reverse()
+    out_Qs = np.array(Qs)
+    return out_Qs
+
+def find_soft_lookahead_response(env, mus,lookahead, temperature=1.0):
+    Qs = []
+    for t in range(env.time_steps):
+        V_t_next = np.zeros((env.observation_space.n,))
+        for tau in range(lookahead).__reversed__():
+            P_t = env.get_P(t+tau, mus[t+tau])
+            Q_t = env.get_R(t+tau, mus[t+tau]) + np.einsum('ijk,k->ji', P_t, V_t_next)
+            V_t_next = Q_t.max(-1) + temperature * np.log(np.exp((Q_t-Q_t.max(-1)[...,None])/temperature).sum(-1))
+        Qs.append(Q_t)
     out_Qs = np.array(Qs)
     return out_Qs
 

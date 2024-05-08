@@ -19,7 +19,10 @@ def parse_args():
    # parser.add_argument("--softmax", action="store_true", default=True, help="Use softmax instead of argmax")
     parser.add_argument("--inf", action="store_true", default=False, help="infinite horizon")
     parser.add_argument("--temperature", type=float, default=0.05, help="Softmax temperature")
-    parser.add_argument("--variant", default="QRE_fpi", choices=["NE_fpi", "NE_fp", "NE_omd","BE_fpi","BE_fp","BE_omd","RE_fpi","RE_fp","RE_omd","QRE_fpi","QRE_fp","expQRE_fp","expRE_fp","expBE_fp","expNE_fp","QRE_omd"])
+    parser.add_argument("--variant", default="QRE", choices=["NE", "BE","RE","QRE"])
+    parser.add_argument("--method",default = "FP", choices=["FPI","FP","expFP"])
+    parser.add_argument("--lookahead",action="store_true", default=False, help="lookahead")
+    parser.add_argument("--tau",type = int,default = 5,help="receding horizon")
     parsed, unknown = parser.parse_known_args()
     def isfloat(num):
         try:
@@ -48,8 +51,8 @@ def generate_config(args):
 def generate_config_from_kw(temperature=0.1, inf=False, **kwargs):
     kwargs['temperature'] = temperature
 
-    kwargs['exp_dir'] = "./results/%s_%s_%d_%f" \
-               % (kwargs['game'], kwargs['variant'], kwargs['fp_iterations'], kwargs['temperature'])
+    kwargs['exp_dir'] = "./results/%s_%s_%s_%d_%f_%d" \
+               % (kwargs['game'], kwargs['variant'],kwargs['method'], kwargs['fp_iterations'], kwargs['temperature'],kwargs['lookahead'])
     kwargs['exp_dir'] += f"/"
 
     from pathlib import Path

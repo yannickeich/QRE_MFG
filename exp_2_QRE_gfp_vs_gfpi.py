@@ -10,8 +10,8 @@ if __name__ == '__main__':
     max_tasks = num_cores // cores_per_task
     child_processes = []
 
-    for variant in["QRE_fp","QRE_fpi","expQRE_fp"]:
-        for temperature in [1.0,0.01]:
+    for variant in["QRE_fp"]:
+        for temperature in [1.0]:
         # for temperature in [0.1,0.2,0.3,0.5,0.7,1.,2.,3.,5.,7.,10.0]:
             for game in ["random"]:
                 p = subprocess.Popen(['python',
