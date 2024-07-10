@@ -8,13 +8,13 @@ class LR(FastMARLEnv):
     Models the Left Right game.
     """
 
-    def __init__(self, time_steps: int = 1,
+    def __init__(self, time_steps: int = 1,mu_0 = np.array([0.0,1.0,0.0]),
                  num_agents: int = 100, **kwargs):
 
         observation_space = Discrete(3)
         action_space = Discrete(2)
 
-        mu_0 = np.array([0.0,1.0,0.0])
+
 
         super().__init__(observation_space, action_space,
                          time_steps, mu_0, num_agents=num_agents, **kwargs)

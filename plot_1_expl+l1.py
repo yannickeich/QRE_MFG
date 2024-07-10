@@ -26,11 +26,14 @@ def plot():
     skip_n = 1
 
     # Same settings as in experiment
-    games = ['random',]
-    variants = ["NE_fp","QRE_fpi","RE_fpi","BE_fpi"]
+    games = ['random','SIS','RPS']
+    variants = ["NE","QRE","RE","BE"]
+    methods = ["pFP"]
     stationary = False
     temperature = 1.0
     iterations = 1000
+    lookahead = False
+    tau = 5
 
     for game in games:
         clist = itertools.cycle(cycler('color',['purple','blue','red','green']))
@@ -72,48 +75,48 @@ def plot():
         # ax2.text(-0.01, 1.06, '(' + string.ascii_lowercase[1] + ')', transform=ax2.transAxes, weight='bold')
         # ax3.text(-0.01, 1.06, '(' + string.ascii_lowercase[2] + ')', transform=ax3.transAxes, weight='bold')
 
+        for method in methods:
+            for variant in variants:
+                plot_vals = []
 
-        for variant in variants:
-            plot_vals = []
+                config = args_parser.generate_config_from_kw(game=game,method=method, variant=variant,temperature=temperature, softmax=True,fp_iterations=iterations,lookahead=lookahead,tau=tau)
+                files = find('stdout', config['exp_dir'])
 
-            config = args_parser.generate_config_from_kw(game=game, variant=variant,temperature=temperature, softmax=True,fp_iterations=iterations)
-            files = find('stdout', config['exp_dir'])
+                with open(max(files, key=os.path.getctime), 'r') as fi:
+                    fi_lines = fi.readlines()
+                    for line in fi_lines[:]:
+                        fields = line.split(" ")
+                        if fields[2] == 'expl:':
+                            # Save number without comma
+                            plot_vals.append(float(fields[3][:-1]))
 
-            with open(max(files, key=os.path.getctime), 'r') as fi:
-                fi_lines = fi.readlines()
-                for line in fi_lines[:]:
-                    fields = line.split(" ")
-                    if fields[2] == 'expl:':
-                        # Save number without comma
-                        plot_vals.append(float(fields[3][:-1]))
+                color = clist.__next__()['color']
+                linestyle = linestyle_cycler.__next__()['linestyle']
+                ax1.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
+                             label=variant)
 
-            color = clist.__next__()['color']
-            linestyle = linestyle_cycler.__next__()['linestyle']
-            ax1.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
-                         label=variant)
+                plot_vals = []
+                with open(max(files, key=os.path.getctime), 'r') as fi:
+                    fi_lines = fi.readlines()
+                    for line in fi_lines[:]:
+                        fields = line.split(" ")
+                        if fields[2] == 'QRE_l1_distance:':
+                            # Save number without comma
+                            plot_vals.append(float(fields[3][:-1]))
 
-            plot_vals = []
-            with open(max(files, key=os.path.getctime), 'r') as fi:
-                fi_lines = fi.readlines()
-                for line in fi_lines[:]:
-                    fields = line.split(" ")
-                    if fields[2] == 'QRE_l1_distance:':
-                        # Save number without comma
-                        plot_vals.append(float(fields[3][:-1]))
+                ax2.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
+                             label=variant)
+                plot_vals = []
+                with open(max(files, key=os.path.getctime), 'r') as fi:
+                    fi_lines = fi.readlines()
+                    for line in fi_lines[:]:
+                        fields = line.split(" ")
+                        if fields[2] == 'RE_l1_distance:':
+                            # Save number without comma
+                            plot_vals.append(float(fields[3][:-1]))
 
-            ax2.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
-                         label=variant)
-            plot_vals = []
-            with open(max(files, key=os.path.getctime), 'r') as fi:
-                fi_lines = fi.readlines()
-                for line in fi_lines[:]:
-                    fields = line.split(" ")
-                    if fields[2] == 'RE_l1_distance:':
-                        # Save number without comma
-                        plot_vals.append(float(fields[3][:-1]))
-
-            ax3.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
-                       label=variant)
+                ax3.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
+                           label=variant)
 
 
         ax1.grid('on')

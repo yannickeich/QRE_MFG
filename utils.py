@@ -54,9 +54,10 @@ def find_soft_lookahead_response(env, mus,lookahead, temperature=1.0):
     for t in range(env.time_steps):
         V_t_next = np.zeros((env.observation_space.n,))
         for tau in range(lookahead).__reversed__():
-            P_t = env.get_P(t+tau, mus[t+tau])
-            Q_t = env.get_R(t+tau, mus[t+tau]) + np.einsum('ijk,k->ji', P_t, V_t_next)
-            V_t_next = Q_t.max(-1) + temperature * np.log(np.exp((Q_t-Q_t.max(-1)[...,None])/temperature).sum(-1))
+            if t + tau < env.time_steps:
+                P_t = env.get_P(t+tau, mus[t+tau])
+                Q_t = env.get_R(t+tau, mus[t+tau]) + np.einsum('ijk,k->ji', P_t, V_t_next)
+                V_t_next = Q_t.max(-1) + temperature * np.log(np.exp((Q_t-Q_t.max(-1)[...,None])/temperature).sum(-1))
         Qs.append(Q_t)
     out_Qs = np.array(Qs)
     return out_Qs

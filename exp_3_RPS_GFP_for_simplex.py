@@ -11,13 +11,14 @@ if __name__ == '__main__':
     max_tasks = num_cores // cores_per_task
     child_processes = []
 
-    for variant in ['expQRE_fp',"expRE_fp","expBE_fp"]:
+    for variant in ['QRE',"RE","BE"]:
         for game in ['RPS',]:
             for temperature in np.exp(np.linspace(-0.5,4.5,50)):
                 p = subprocess.Popen(['python',
                                       './main_fp.py',
                                       f'--game={game}',
                                       f'--fp_iterations={1000}',
+                                      f'--method={"pFP"}',
                                       f'--variant={variant}',
                                       f'--temperature={temperature}',
                                       ])

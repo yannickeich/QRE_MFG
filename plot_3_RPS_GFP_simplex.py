@@ -117,7 +117,10 @@ def plot():
 
     games = ['RPS',]
     n_actions = 3
-    variants = ["expRE_fp","expQRE_fp","expBE_fp"]
+    variants = ["RE","QRE","BE"]
+    method = "pFP"
+    lookahead = False
+    tau = 5
 
     # same configs as in experiment
     temperature_list  = np.exp(np.linspace(-0.5,4.5,50))
@@ -181,7 +184,7 @@ def plot():
 
 
             for j, temperature in enumerate(temperature_list):
-                config = args_parser.generate_config_from_kw(game=game, variant=variant,temperature=temperature,fp_iterations=fp_iterations)
+                config = args_parser.generate_config_from_kw(game=game, variant=variant,method=method,temperature=temperature,fp_iterations=fp_iterations,lookahead=lookahead,tau=tau)
                 files = find('action_probs.npy', config['exp_dir'])
                 action_probs = np.load(files[0])
                 plot_values[i,j] = action_probs[0,0]

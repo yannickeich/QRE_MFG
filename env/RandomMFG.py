@@ -8,7 +8,7 @@ class RandomMFG(FastMARLEnv):
     Models the Left Right game.
     """
 
-    def __init__(self, num_states: int = 1000, num_actions: int = 3,time_steps: int = 10,
+    def __init__(self, num_states: int = 100, num_actions: int = 3,time_steps: int = 10,mu_0=None,
                  num_agents: int = 100, **kwargs):
 
         self.num_states = num_states
@@ -24,8 +24,8 @@ class RandomMFG(FastMARLEnv):
 
         observation_space = Discrete(num_states)
         action_space = Discrete(num_actions)
-
-        mu_0 = np.ones(num_states)/num_states
+        if mu_0 is None:
+            mu_0 = np.ones(num_states)/num_states
 
         super().__init__(observation_space, action_space,
                          time_steps, mu_0, num_agents=num_agents, **kwargs)
@@ -53,7 +53,8 @@ class RandomMFG(FastMARLEnv):
         R -= np.log(mu)[:,None]
         return R
 
-    def final_R(self,mu):
-        R = np.zeros(self.observation_space.n)
-        R -= np.log(mu)
-        return R
+    # TODO:  For now, dont use final rewards, because they are not included in lookahead q functions
+    # def final_R(self,mu):
+    #     R = np.zeros(self.observation_space.n)
+    #     R -= np.log(mu)
+    #     return R

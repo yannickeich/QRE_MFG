@@ -8,7 +8,7 @@ class riskRPS(FastMARLEnv):
     Models the Rock Paper Scissor game.
     """
 
-    def __init__(self, time_steps: int = 2,
+    def __init__(self, time_steps: int = 2, mu_0 = np.array([1.,0.,0.,0.,0.]),
                  num_agents: int = 100, **kwargs):
 
         # Initial state and a state for rock, paper, scissors each.

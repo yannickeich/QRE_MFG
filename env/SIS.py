@@ -8,7 +8,7 @@ class SIS(FastMARLEnv):
     Models the SIS game.
     """
 
-    def __init__(self, infection_rate: float = 0.81, recovery_rate: float = 0.3, time_steps: int = 50,
+    def __init__(self, infection_rate: float = 0.81, recovery_rate: float = 0.3, time_steps: int = 50,mu_0=None,
                  initial_infection_prob: float = 0.1, cost_infection: float = 1, cost_action: float = 0.5,
                  num_agents: int = 100, **kwargs):
         self.infection_rate = infection_rate
