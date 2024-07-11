@@ -3,20 +3,20 @@ import numpy as np
 
 def get_action_probs_from_Qs(Qs):
     """ For Q tables in N x ... x X x U where N the number of Q tables, compute the action probs X x U,
-     i.e. max over last argument, and averaged over first argument """
+     i.e. max over last argument """
     a = Qs.reshape((-1, Qs.shape[-1]))
     b = np.zeros_like(a)
     b[np.arange(len(a)), a.argmax(1)] = 1
-    return b.reshape(Qs.shape).mean(0)
+    return b.reshape(Qs.shape)
 
 
 def get_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs):
     """ For Q tables in N x ... x X x U where N the number of Q tables, compute the action probs X x U,
-     i.e. max over last argument, and averaged over first argument """
+     i.e. max over last argument """
     a = Qs.reshape((-1, Qs.shape[-1]))
     b = np.zeros_like(a)
     b[np.arange(len(a)), a.argmax(1)] = 1
-    new_probs = b.reshape(Qs.shape).mean(0)
+    new_probs = b.reshape(Qs.shape)
     return (old_probs * num_averages_yet + new_probs) / (num_averages_yet + 1)
 
 
@@ -89,6 +89,27 @@ def get_curr_mf(env, action_probs):
 
     return np.array(mus)
 
+def get_curr_mf_p(env,mus_0, action_probs):
+    """
+    Parallel version of get_curr_mf.
+    Parallel over the first dimension
+    """
+    mus = np.zeros((mus_0.shape[0],env.time_steps+1,env.observation_space.n))
+    curr_mf = mus_0
+    mus[:,0,:] = mus_0
+    for t in range(env.time_steps):
+        P_t = []
+        for i in range(action_probs.shape[0]):
+            P_t.append(env.get_P(t, mus[i,t]))
+        P_t = np.array(P_t)
+        xu = curr_mf[...,None] * action_probs[:,t]
+        curr_mf = np.einsum('hijk,hji->hk', P_t, xu)
+        mus[:, t+1, :] = curr_mf
+
+    return mus
+
+
+
 
 def eval_curr_reward_lookahead(env, action_probs, mus,lookahead):
     Qs = []
@@ -125,63 +146,63 @@ def eval_curr_reward(env, action_probs, mus):
 
 def get_softmax_action_probs_from_Qs(Qs, temperature=1.0):
     """ For Q tables in N x X x U where N the number of Q tables, compute the action probs X x U,
-     i.e. max over last argument, and averaged over first argument """
+     i.e. max over last argument, """
     a = Qs.reshape((-1, Qs.shape[-1]))
     a = a - a.max(1, keepdims=True)
     b = np.exp(a / temperature)
     b = b / (np.sum(b, axis=1, keepdims=True))
-    return b.reshape(Qs.shape).mean(0)
+    return b.reshape(Qs.shape)
 
 
 def get_softmax_new_action_probs_from_Qs(num_averages_yet, old_probs, Qs, temperature=1.0):
     """ For Q tables in N x X x U where N the number of Q tables, compute the action probs X x U,
-     i.e. max over last argument, and averaged over first argument """
+     i.e. max over last argument """
     a = Qs.reshape((-1, Qs.shape[-1]))
     a = a - a.max(1, keepdims=True)
     b = np.exp(a / temperature)
     b = b / (np.sum(b, axis=1, keepdims=True))
-    new_probs = b.reshape(Qs.shape).mean(0)
+    new_probs = b.reshape(Qs.shape)
     return (old_probs * 0.9 + 0.1 * new_probs) / (1)
 
-
-def value_based_forward(env, V_br):
-    mus = []
-    curr_mf = env.mu_0
-    mus.append(curr_mf)
-    for t in range(env.time_steps):
-        P_t = env.get_P(t, mus[t])
-        Q_t = env.get_R(t, mus[t])
-
-        Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
-        a = Q_t.reshape((-1, Q_t.shape[-1]))
-        action_probs = np.zeros_like(a)
-        action_probs[np.arange(len(a)), a.argmax(1)] = 1
-        #action_probs = action_probs.reshape(Q_t.shape).mean(0)
-        xu = np.expand_dims(curr_mf, axis=(1,)) * action_probs
-        curr_mf = np.einsum('ijk,ji->k', P_t, xu)
-        mus.append(curr_mf)
-
-    return np.array(mus)
-
-def value_based_softmax_forward(env, V_br,temperature):
-    mus = []
-    curr_mf = env.mu_0
-    mus.append(curr_mf)
-    for t in range(env.time_steps):
-        P_t = env.get_P(t, mus[t])
-        Q_t = env.get_R(t, mus[t])
-
-        Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
-
-        a = Q_t.reshape((-1, Q_t.shape[-1]))
-        a = a - a.max(1, keepdims=True)
-        b = np.exp(a / temperature)
-        b = b / (np.sum(b, axis=1, keepdims=True))
-        #b=b.reshape(Q_t.shape).mean(0)
-        action_probs = b
-
-        xu = np.expand_dims(curr_mf, axis=(1,)) * action_probs
-        curr_mf = np.einsum('ijk,ji->k', P_t, xu)
-        mus.append(curr_mf)
-
-    return np.array(mus)
+#
+# def value_based_forward(env, V_br):
+#     mus = []
+#     curr_mf = env.mu_0
+#     mus.append(curr_mf)
+#     for t in range(env.time_steps):
+#         P_t = env.get_P(t, mus[t])
+#         Q_t = env.get_R(t, mus[t])
+#
+#         Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
+#         a = Q_t.reshape((-1, Q_t.shape[-1]))
+#         action_probs = np.zeros_like(a)
+#         action_probs[np.arange(len(a)), a.argmax(1)] = 1
+#         #action_probs = action_probs.reshape(Q_t.shape).mean(0)
+#         xu = np.expand_dims(curr_mf, axis=(1,)) * action_probs
+#         curr_mf = np.einsum('ijk,ji->k', P_t, xu)
+#         mus.append(curr_mf)
+#
+#     return np.array(mus)
+#
+# def value_based_softmax_forward(env, V_br,temperature):
+#     mus = []
+#     curr_mf = env.mu_0
+#     mus.append(curr_mf)
+#     for t in range(env.time_steps):
+#         P_t = env.get_P(t, mus[t])
+#         Q_t = env.get_R(t, mus[t])
+#
+#         Q_t += np.einsum('ijk,k->ji', P_t, V_br[t+1])
+#
+#         a = Q_t.reshape((-1, Q_t.shape[-1]))
+#         a = a - a.max(1, keepdims=True)
+#         b = np.exp(a / temperature)
+#         b = b / (np.sum(b, axis=1, keepdims=True))
+#         #b=b.reshape(Q_t.shape).mean(0)
+#         action_probs = b
+#
+#         xu = np.expand_dims(curr_mf, axis=(1,)) * action_probs
+#         curr_mf = np.einsum('ijk,ji->k', P_t, xu)
+#         mus.append(curr_mf)
+#
+#     return np.array(mus)

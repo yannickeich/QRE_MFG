@@ -13,8 +13,6 @@ class FastMARLEnv(ABC):
         self.action_space = action_space
         self.time_steps = time_steps
         self.mu_0 = mu_0
-        if isinstance(self.mu_0,str):
-            self.mu_0 = st
         self.num_agents = num_agents
 
         super().__init__()

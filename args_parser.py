@@ -57,7 +57,8 @@ def generate_config_from_kw(temperature=0.1, inf=False, mf_method=None,**kwargs)
 
     if mf_method == "RH":
         kwargs['exp_dir'] = kwargs['exp_dir'].replace("/results/", "/RH_results/")
-
+    if mf_method == "pRH":
+        kwargs['exp_dir'] = kwargs['exp_dir'].replace("/results/", "/pRH_results/")
     from pathlib import Path
 
     Path(f"{kwargs['exp_dir']}").mkdir(parents=True, exist_ok=True)

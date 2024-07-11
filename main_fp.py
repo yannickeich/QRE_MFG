@@ -10,8 +10,8 @@ if __name__ == '__main__':
     env: FastMARLEnv = config['game'](**config)
     tau = config['tau']
     #Initial
-    Q_0 = [np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))]
-    action_probs = get_action_probs_from_Qs(np.array(Q_0))
+    Q_0 = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
+    action_probs = get_action_probs_from_Qs(Q_0)
 
     #For FP
     sum_action_probs = np.zeros_like(action_probs)
@@ -77,13 +77,13 @@ if __name__ == '__main__':
 
             """ Compare Policies """
             """Boltzmann L1-Distance """
-            BE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
+            BE_action_probs = get_softmax_action_probs_from_Qs(Q_br, temperature=config['temperature'])
             print(f"{config['exp_dir']} {iteration}: BE_l1_distance: {np.abs(BE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write(f"{config['exp_dir']} {iteration}: BE_l1_distance: {np.abs(BE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write('\n')
 
             """QRE L1-Distance"""
-            QRE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
+            QRE_action_probs = get_softmax_action_probs_from_Qs(Q_pi, temperature=config['temperature'])
             print(f"{config['exp_dir']} {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write(f"{config['exp_dir']} {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write('\n')
@@ -91,7 +91,7 @@ if __name__ == '__main__':
             """Relative Entropy L1-Distance"""
             #mus or mu_compare?
             Q_sr = find_soft_response(env, mu_compare, temperature=config['temperature'])
-            RE_action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
+            RE_action_probs = get_softmax_action_probs_from_Qs(Q_sr, temperature=config['temperature'])
             print(f"{config['exp_dir']} {iteration}: RE_l1_distance: {np.abs(RE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write(f"{config['exp_dir']} {iteration}: RE_l1_distance: {np.abs(RE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
             fo.write("\n")
@@ -113,7 +113,7 @@ if __name__ == '__main__':
                 elif (config['method']=="FPI")|(config['method']=='pFP'):
                     if config['lookahead']:
                         Q_br = find_best_lookahead_response(env, mus, tau)
-                action_probs = get_action_probs_from_Qs(np.array([Q_br]))
+                action_probs = get_action_probs_from_Qs(Q_br)
 
             elif config['variant'] == 'QRE':
                 #If FP method compute Q_pi wtr mus_avg
@@ -125,7 +125,7 @@ if __name__ == '__main__':
                 elif (config['method']=="FPI")|(config['method']=='pFP'):
                     if config['lookahead']:
                         Q_pi = eval_curr_reward_lookahead(env, action_probs, mus, tau)
-                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_pi]), temperature=config['temperature'])
+                action_probs = get_softmax_action_probs_from_Qs(Q_pi, temperature=config['temperature'])
 
             elif config['variant'] == 'BE':
                 #If FP method compute best response wtr mus_avg
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                 elif (config['method']=="FPI")|(config['method']=='pFP'):
                     if config['lookahead']:
                         Q_br = find_best_lookahead_response(env,mus,tau)
-                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_br]), temperature=config['temperature'])
+                action_probs = get_softmax_action_probs_from_Qs(Q_br, temperature=config['temperature'])
 
             elif config['variant'] == "RE":
                 #If FP method compute soft response wtr mus_avg
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                     else:
                         Q_sr = find_soft_response(env, mus, temperature=config['temperature'])
 
-                action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
+                action_probs = get_softmax_action_probs_from_Qs(Q_sr, temperature=config['temperature'])
 
             else:
                 raise NotImplementedError

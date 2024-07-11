@@ -28,9 +28,11 @@ def plot():
     # Same settings as in experiment
     games = ['random',]
     variant = "QRE"
-    methods = ["pFP"]
+    methods = ["expFPv1"]
+    mf_method = None
+    mf_method = "RH"
     stationary = False
-    temperature = 0.2
+    temperature = 0.9
     iterations = 1000
     lookahead = True
     taus = np.arange(2,10)
@@ -70,7 +72,7 @@ def plot():
             for tau in taus:
                 plot_vals = []
 
-                config = args_parser.generate_config_from_kw(game=game,method=method, variant=variant,temperature=temperature, softmax=True,fp_iterations=iterations,lookahead=lookahead,tau=tau)
+                config = args_parser.generate_config_from_kw(game=game,method=method, variant=variant,temperature=temperature, softmax=True,fp_iterations=iterations,lookahead=lookahead,tau=tau,mf_method=mf_method)
                 files = find('stdout', config['exp_dir'])
 
                 with open(max(files, key=os.path.getctime), 'r') as fi:
