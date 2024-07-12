@@ -8,16 +8,13 @@ from utils import get_curr_mf_p, eval_curr_reward_p, find_best_response_p, find_
 
 if __name__ == '__main__':
     config = args_parser.parse_config(mf_method="pRH")
-
     tau = config['tau']
-
     env: FastMARLEnv = config['game'](**config)
+
     #Get initial condition and horizon from the environment
     mu_0 = env.mu_0
     total_horizon = env.time_steps
-    action_probs_final = np.zeros((total_horizon, env.observation_space.n, env.action_space.n))
-    mu_final = np.zeros((total_horizon+1, env.observation_space.n))
-    mu_final[0] = mu_0
+
 
     number_mfgs = total_horizon-tau+1
     #Set the horizon of the environment to the receding horizon lookahead
@@ -33,12 +30,11 @@ if __name__ == '__main__':
     # For FP
     sum_action_probs_p = np.zeros_like(action_probs_p)
 
-
     # mus_avg_p = []
     # for i in range(number_mfgs):
     #     mus_avg_p.append(get_curr_mf(env, action_probs_p[i]))
 
-    #Why is it slower than the for loop
+    #parallel version instead of for loop
     initial_mu = mu_p[:, 0, :]
     mus_avg_p = get_curr_mf_p(env,initial_mu,action_probs_p)
 
@@ -59,7 +55,7 @@ if __name__ == '__main__':
 
                 """Evaluation"""
                 # IF FP: we have to compare the average policy against the best response to the meanfield induced by the average policy
-                # This is only the average policy, that leads to the average mean field, when the dynamics do not depend on the mean field
+                # the average policy, that leads to the average mean field, can only be computed, when the dynamics do not depend on the mean field
                 if config['method'] == "FP":
                     sum_action_probs_p = sum_action_probs_p + action_probs_p * np.array(mus_p)[:,:-1][..., None]
                     action_probs_avg_p = sum_action_probs_p/sum_action_probs_p.sum(-1)[...,None]
@@ -88,7 +84,7 @@ if __name__ == '__main__':
                     action_probs_compare_p = action_probs_p.copy()
                     mu_compare_p = mus_p.copy()
 
-
+                #Compute Value functions to get the response policies with respect to the induced meanfield
                 V_pi_p, Q_pi_p = eval_curr_reward_p(env,action_probs_compare_p,mu_compare_p)
                 Q_br_p= find_best_response_p(env, mu_compare_p)
                 Q_sr_p = find_soft_response_p(env,mu_compare_p,temperature=config['temperature'])
@@ -121,26 +117,28 @@ if __name__ == '__main__':
                                                                       temperature=config['temperature'])
                 RE_action_probs_p = get_softmax_action_probs_from_Qs(Q_sr_p,
                                                                      temperature=config['temperature'])
-                for i in range(number_mfgs):
-                    """ Exploitability """
-                    print(f"{config['exp_dir']} {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
-                    fo.write(f"{config['exp_dir']} {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
-                    fo.write('\n')
 
-                    """Boltzmann L1-Distance """
-                    print(f"{config['exp_dir']} {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                    fo.write(f"{config['exp_dir']} {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                    fo.write('\n')
+                if iteration % 10 ==0:
+                    for i in range(number_mfgs):
+                        """ Exploitability """
+                        print(f"{config['exp_dir']} game {i} iteration {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
+                        fo.write(f"{config['exp_dir']} game{i} iteration {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
+                        fo.write('\n')
 
-                    """QRE L1-Distance"""
-                    print(f"{config['exp_dir']} {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                    fo.write(f"{config['exp_dir']} {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                    fo.write('\n')
+                        """Boltzmann L1-Distance """
+                        print(f"{config['exp_dir']} game {i} iteration {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                        fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                        fo.write('\n')
 
-                    """Relative Entropy L1-Distance"""
-                    print(f"{config['exp_dir']} {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                    fo.write(f"{config['exp_dir']} {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                    fo.write("\n")
+                        """QRE L1-Distance"""
+                        print(f"{config['exp_dir']} game {i} iteration {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                        fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                        fo.write('\n')
+
+                        """Relative Entropy L1-Distance"""
+                        print(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                        fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                        fo.write("\n")
 
                 ### Average mean_field for FP methods
                 if config['method']=='FP':
@@ -171,9 +169,6 @@ if __name__ == '__main__':
                     #If FP method compute soft response wtr mus_avg
                     if (config['method'] == 'FP') |(config['method']=='expFPv1')|(config['method']=='expFPv2'):
                             Q_sr_p = find_soft_response(env,mus_avg_p,temperature=config['temperature'])
-                    elif (config['method']=="FPI")|(config['method']=='pFP'):
-                            Q_sr_p = find_soft_response(env, mus_p, temperature=config['temperature'])
-
                     action_probs_p = get_softmax_action_probs_from_Qs(Q_sr_p, temperature=config['temperature'])
 
                 else:
@@ -183,14 +178,9 @@ if __name__ == '__main__':
                 initial_mu[1:] = mu_compare_p[:-1, 1]
 
 
-            # action_probs_final[i] = action_probs[0]
-            # mu_final[i+1] = mus[1]
-
-    #         action_probs_final[i] = action_probs[0]
-    #         mu_final[i+1] = mus[1]
-    # #The last tau actions are taken from one mfg
-    # action_probs_final[i:] = action_probs[0:]
-    # mu_final[i + 1:] = mus[1:]
+    action_probs_final = np.zeros((total_horizon, env.observation_space.n, env.action_space.n))
+    mu_final = np.zeros((total_horizon+1, env.observation_space.n))
+    mu_final[0] = mu_0
     # np.save(config['exp_dir'] + f"action_probs.npy", action_probs_compare)
     # np.save(config['exp_dir'] + f"best_response.npy", Q_br)
     # np.save(config['exp_dir'] + f"mean_field.npy", mu_compare)

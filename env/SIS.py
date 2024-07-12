@@ -46,20 +46,31 @@ class SIS(FastMARLEnv):
         return rewards
 
     def get_P(self, t, mu):
-        P = np.zeros((self.action_space.n, self.observation_space.n, self.observation_space.n))
+        """
+        returns transitions for all states and action at time t with meanfield mu at time t
+        also possible for a collection of mus, for parallel computation (... used for possible extra dim)
+        """
 
-        P[:, 1, 0] = self.recovery_rate
-        P[:, 1, 1] = 1 - P[:, 1, 0]
-        P[0, 0, 1] = self.infection_rate * mu[1]
-        P[0, 0, 0] = 1 - P[0, 0, 1]
-        P[1, 0, 0] = 1
+        P = np.zeros((self.action_space.n, self.observation_space.n, self.observation_space.n))
+        if len(mu.shape)==2:
+            P = np.zeros((mu.shape[0],self.action_space.n, self.observation_space.n, self.observation_space.n))
+
+        P[...,:, 1, 0] = self.recovery_rate
+        P[...,:, 1, 1] = 1 - P[...,:, 1, 0]
+        P[...,0, 0, 1] = self.infection_rate * mu[...,1]
+        P[...,0, 0, 0] = 1 - P[...,0, 0, 1]
+        P[...,1, 0, 0] = 1
 
         return P
 
     def get_R(self, t, mu):
-        R = np.zeros((self.observation_space.n, self.action_space.n))
+        """
+        returns reward for all states and action at time t with meanfield mu at time t
+        also possible for a collection of mus, for parallel computation (... used for possible extra dim)
+        """
+        R = np.zeros((*mu.shape, self.action_space.n))
 
-        R[1, :] -= self.cost_infection
-        R[:, 1] -= self.cost_action
+        R[...,1, :] -= self.cost_infection
+        R[...,:, 1] -= self.cost_action
 
         return R

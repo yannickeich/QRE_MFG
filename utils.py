@@ -197,10 +197,13 @@ def eval_curr_reward_p(env, action_probs_p,mus_p):
     R_t = np.zeros((n_mfgs, n_obs, n_actions))
     for i in range(n_mfgs):
         V_t_next[i] += env.final_R(mus_p[i,-1])
+    #V_t_next = env.final_R(mus_p[:,-1])
     for t in range(env.time_steps).__reversed__():
         for i in range(n_mfgs):
             P_t[i] = env.get_P(t, mus_p[i,t])
             R_t[i] = env.get_R(t, mus_p[i,t])
+        #P_t =  env.get_P(t, mus_p[:,t])
+        #R_t = env.get_R(t, mus_p[:,t])
         Q_t = R_t  + np.einsum('hijk,hk->hji', P_t, V_t_next)
         V_t_next = np.sum(action_probs_p[:,t] * Q_t, axis=-1)
         Qs[:,t] = Q_t

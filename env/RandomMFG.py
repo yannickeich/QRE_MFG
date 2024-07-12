@@ -46,11 +46,22 @@ class RandomMFG(FastMARLEnv):
 
     def get_P(self, t, mu):
 
-        return self.P
+        if len(mu.shape)==1:
+            return self.P
+        # if mu is an ensemble return an extra dimension
+        elif len(mu.shape)==2:
+            return self.P[None]
+        else:
+            raise ValueError
 
     def get_R(self, t, mu):
         R = self.R.copy()
-        R -= np.log(mu)[:,None]
+        if mu.ndim ==1:
+            R -= np.log(mu)[...,None]
+        elif mu.ndim == 2:
+            R= R[None]- np.log(mu)[..., None]
+        else:
+            raise ValueError
         return R
 
     # TODO:  For now, dont use final rewards, because they are not included in lookahead q functions

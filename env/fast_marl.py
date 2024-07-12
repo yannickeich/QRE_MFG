@@ -65,4 +65,4 @@ class FastMARLEnv(ABC):
         Return the reward in the final time step, that is only state dependent.
         This function can be overwritten in the specific examples, if not zero.
         """
-        return np.zeros(self.observation_space.n)
+        return np.zeros_like(mu)
