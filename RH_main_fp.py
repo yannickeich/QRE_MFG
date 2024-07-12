@@ -150,7 +150,7 @@ if __name__ == '__main__':
                     elif (config['method']=="FPI")|(config['method']=='pFP'):
                             Q_sr = find_soft_response(env, mus, temperature=config['temperature'])
 
-                    action_probs = get_softmax_action_probs_from_Qs(np.array([Q_sr]), temperature=config['temperature'])
+                    action_probs = get_softmax_action_probs_from_Qs(Q_sr, temperature=config['temperature'])
 
                 else:
                     raise NotImplementedError
