@@ -49,6 +49,27 @@ def find_best_response(env, mus):
     out_Qs = np.array(Qs)
     return out_Qs
 
+def find_best_response_p(env, mus):
+    """
+    Parallelized version of find_best_response
+    """
+    n_mfgs, time_steps, n_obs, n_actions = mus.shape[0], env.time_steps, env.observation_space.n, env.action_space.n
+    Qs = np.zeros((n_mfgs,time_steps,n_obs,n_actions))
+    V_t_next = np.zeros((n_mfgs,env.observation_space.n ))
+    P_t = np.zeros((n_mfgs, n_actions, n_obs, n_obs))
+    R_t = np.zeros((n_mfgs, n_obs, n_actions))
+    for i in range(n_mfgs):
+        V_t_next[i] += env.final_R(mus[i,-1])
+    for t in range(env.time_steps).__reversed__():
+        for i in range(n_mfgs):
+            P_t[i] = env.get_P(t, mus[i,t])
+            R_t[i] = env.get_R(t, mus[i,t])
+        Q_t =R_t + np.einsum('hijk,hk->hji', P_t, V_t_next)
+        V_t_next = np.max(Q_t, axis=-1)
+        Qs[:,t]=Q_t
+
+    return Qs
+
 def find_soft_lookahead_response(env, mus,lookahead, temperature=1.0):
     Qs = []
     for t in range(env.time_steps):
@@ -76,6 +97,26 @@ def find_soft_response(env, mus,temperature=1.0):
     out_Qs = np.array(Qs)
     return out_Qs
 
+def find_soft_response_p(env, mus,temperature=1.0):
+    """
+    Parallel version of find_soft_response
+    """
+    n_mfgs, time_steps, n_obs, n_actions = mus.shape[0], env.time_steps, env.observation_space.n, env.action_space.n
+    Qs = np.zeros((n_mfgs,time_steps,n_obs,n_actions))
+    V_t_next = np.zeros((n_mfgs,env.observation_space.n ))
+    P_t = np.zeros((n_mfgs, n_actions, n_obs, n_obs))
+    R_t = np.zeros((n_mfgs, n_obs, n_actions))
+    for i in range(n_mfgs):
+        V_t_next[i] += env.final_R(mus[i,-1])
+    for t in range(env.time_steps).__reversed__():
+        for i in range(n_mfgs):
+            P_t[i] = env.get_P(t, mus[i, t])
+            R_t[i] = env.get_R(t, mus[i, t])
+        Q_t =R_t + np.einsum('hijk,hk->hji', P_t, V_t_next)
+        V_t_next = Q_t.max(-1) + temperature * np.log(np.exp((Q_t-Q_t.max(-1)[...,None])/temperature).sum(-1))
+        Qs[:,t] = Q_t
+
+    return Qs
 
 def get_curr_mf(env, action_probs):
     mus = []
@@ -94,12 +135,14 @@ def get_curr_mf_p(env,mus_0, action_probs):
     Parallel version of get_curr_mf.
     Parallel over the first dimension
     """
-    mus = np.zeros((mus_0.shape[0],env.time_steps+1,env.observation_space.n))
+    #TODO get rid of for loop for calling P_t. Needs to be changed in the environments.
+    n_mfgs, time_steps, n_obs = mus_0.shape[0], env.time_steps, env.observation_space.n
+    mus = np.zeros((n_mfgs,time_steps+1,n_obs))
     curr_mf = mus_0
     mus[:,0,:] = mus_0
-    for t in range(env.time_steps):
+    for t in range(time_steps):
         P_t = []
-        for i in range(action_probs.shape[0]):
+        for i in range(n_mfgs):
             P_t.append(env.get_P(t, mus[i,t]))
         P_t = np.array(P_t)
         xu = curr_mf[...,None] * action_probs[:,t]
@@ -142,6 +185,27 @@ def eval_curr_reward(env, action_probs, mus):
     Qs.reverse()
     out_Qs = np.array(Qs)
     return V_t_next, out_Qs
+
+def eval_curr_reward_p(env, action_probs_p,mus_p):
+    """
+    Parallel version of eval_curr_reward
+    """
+    n_mfgs, time_steps, n_obs, n_actions = mus_p.shape[0], env.time_steps, env.observation_space.n, env.action_space.n
+    Qs = np.zeros((n_mfgs,time_steps,n_obs,n_actions))
+    V_t_next = np.zeros((n_mfgs,env.observation_space.n ))
+    P_t = np.zeros((n_mfgs, n_actions, n_obs, n_obs))
+    R_t = np.zeros((n_mfgs, n_obs, n_actions))
+    for i in range(n_mfgs):
+        V_t_next[i] += env.final_R(mus_p[i,-1])
+    for t in range(env.time_steps).__reversed__():
+        for i in range(n_mfgs):
+            P_t[i] = env.get_P(t, mus_p[i,t])
+            R_t[i] = env.get_R(t, mus_p[i,t])
+        Q_t = R_t  + np.einsum('hijk,hk->hji', P_t, V_t_next)
+        V_t_next = np.sum(action_probs_p[:,t] * Q_t, axis=-1)
+        Qs[:,t] = Q_t
+
+    return V_t_next, Qs
 
 
 def get_softmax_action_probs_from_Qs(Qs, temperature=1.0):

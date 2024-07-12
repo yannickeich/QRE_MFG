@@ -8,7 +8,7 @@ class RandomMFG(FastMARLEnv):
     Models the Left Right game.
     """
 
-    def __init__(self, num_states: int = 100, num_actions: int = 3,time_steps: int = 10,mu_0=None,
+    def __init__(self, num_states: int = 7, num_actions: int = 3,time_steps: int = 20,mu_0=None,
                  num_agents: int = 100, **kwargs):
 
         self.num_states = num_states
