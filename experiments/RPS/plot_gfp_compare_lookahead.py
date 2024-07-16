@@ -77,10 +77,10 @@ def plot():
                     fi_lines = fi.readlines()
                     for line in fi_lines[:]:
                         fields = line.split(" ")
-                        if fields[2] == 'expl:':
-                            # Save number without comma
-                            plot_vals.append(float(fields[3][:-1]))
-
+                        for i, field in enumerate(fields):
+                            if field == 'expl:':
+                                # Save number without comma
+                                plot_vals.append(float(fields[i+1][:-1]))
                 color = clist.__next__()['color']
                 linestyle = linestyle_cycler.__next__()['linestyle']
                 ax1.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
@@ -91,10 +91,10 @@ def plot():
                     fi_lines = fi.readlines()
                     for line in fi_lines[:]:
                         fields = line.split(" ")
-                        if fields[2] == 'QRE_l1_distance:':
-                            # Save number without comma
-                            plot_vals.append(float(fields[3][:-1]))
-
+                        for i, field in enumerate(fields):
+                            if field == 'QRE_l1_distance:':
+                                # Save number without comma
+                                plot_vals.append(float(fields[i+1][:-1]))
                 ax2.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
                              label=variant)
 

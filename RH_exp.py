@@ -15,14 +15,14 @@ if __name__ == '__main__':
             for tau in range(5,6):
                 #for temperature in [0.5]:
                 for temperature in [1.0]:
-                    for game in ["RPS"]:
+                    for game in ["random"]:
                         p = subprocess.Popen(['python',
                                               './parallel_RH_main_fp.py',
                                               f'--game={game}',
-                                              f'--fp_iterations={1000}',
+                                              f'--fp_iterations={10000}',
                                               f'--method={method}',
                                               f'--variant={variant}',
-                                              f'--tau={3}',
+                                              f'--tau={10}',
                                               f'--temperature={temperature}'
                                               #f'--lookahead',
                                               ])

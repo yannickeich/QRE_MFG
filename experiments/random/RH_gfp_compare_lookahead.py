@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 for temperature in [0.9]:
                     for game in ["random"]:
                         p = subprocess.Popen(['python',
-                                              '../.././RH_main_fp.py',
+                                              '../.././parallel_RH_main_fp.py',
                                               f'--game={game}',
                                               f'--fp_iterations={1000}',
                                               f'--method={method}',

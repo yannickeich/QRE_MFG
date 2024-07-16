@@ -118,27 +118,26 @@ if __name__ == '__main__':
                 RE_action_probs_p = get_softmax_action_probs_from_Qs(Q_sr_p,
                                                                      temperature=config['temperature'])
 
-                if iteration % 10 ==0:
-                    for i in range(number_mfgs):
-                        """ Exploitability """
-                        print(f"{config['exp_dir']} game {i} iteration {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
-                        fo.write(f"{config['exp_dir']} game{i} iteration {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
-                        fo.write('\n')
+                for i in range(number_mfgs):
+                    """ Exploitability """
+                    print(f"{config['exp_dir']} game {i} iteration {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
+                    fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: expl: {v_1_p[i] - v_curr_1_p[i]}, ... br achieves {v_1_p[i]} vs. {v_curr_1_p[i]}")
+                    fo.write('\n')
 
-                        """Boltzmann L1-Distance """
-                        print(f"{config['exp_dir']} game {i} iteration {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                        fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                        fo.write('\n')
+                    """Boltzmann L1-Distance """
+                    print(f"{config['exp_dir']} game {i} iteration {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                    fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: BE_l1_distance: {np.abs(BE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                    fo.write('\n')
 
-                        """QRE L1-Distance"""
-                        print(f"{config['exp_dir']} game {i} iteration {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                        fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                        fo.write('\n')
+                    """QRE L1-Distance"""
+                    print(f"{config['exp_dir']} game {i} iteration {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                    fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: QRE_l1_distance: {np.abs(QRE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                    fo.write('\n')
 
-                        """Relative Entropy L1-Distance"""
-                        print(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                        fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
-                        fo.write("\n")
+                    """Relative Entropy L1-Distance"""
+                    print(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                    fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
+                    fo.write("\n")
 
                 ### Average mean_field for FP methods
                 if config['method']=='FP':

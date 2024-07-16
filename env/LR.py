@@ -34,18 +34,24 @@ class LR(FastMARLEnv):
         raise NotImplementedError
 
     def get_P(self, t, mu):
+        """
+        Transition matrix for the LR game given the current meanfield mu
+        Made a parallel call possible with if mu.ndim==2, Ellipsis operator for that case
+        """
         P = np.zeros((self.action_space.n, self.observation_space.n, self.observation_space.n))
+        if mu.ndim == 2:
+            P = np.zeros((mu.shape[0],self.action_space.n, self.observation_space.n, self.observation_space.n))
 
         #Go left
-        P[0, 1, 0] = 1.0
+        P[...,0, 1, 0] = 1.0
         # already in end position -> stay
-        P[0, 0, 0] = 1.0
-        P[0, 2, 2] = 1.0
+        P[...,0, 0, 0] = 1.0
+        P[...,0, 2, 2] = 1.0
         #Go right
-        P[1, 1, 2] = 1.0
+        P[...,1, 1, 2] = 1.0
         # already in end position -> stay
-        P[1, 0, 0] = 1.0
-        P[1, 2, 2] = 1.0
+        P[...,1, 0, 0] = 1.0
+        P[...,1, 2, 2] = 1.0
         return P
 
     def get_R(self, t, mu):
