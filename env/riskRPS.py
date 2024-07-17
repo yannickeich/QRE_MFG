@@ -36,42 +36,50 @@ class riskRPS(FastMARLEnv):
 
     def get_P(self, t, mu):
         P = np.zeros((self.action_space.n, self.observation_space.n, self.observation_space.n))
+        if mu.ndim == 2:
+            P = np.zeros((mu.shape[0],self.action_space.n, self.observation_space.n, self.observation_space.n))
 
         # Choose Rock
-        P[0, 0, 1] = 1.0
+        P[...,0, 0, 1] = 1.0
         # Choose Paper
-        P[1, 0, 2] = 1.0
+        P[...,1, 0, 2] = 1.0
         # Choose Scissor
-        P[2, 0, 3] = 1.0
+        P[...,2, 0, 3] = 1.0
 
         #Already decided -> Paper and Scissor stay, Rock has 50/50 to move in lose state
         #Not dependent on action
-        P[:, 1, 1] = 0.5
-        P[:, 1, 4] = 0.5
-        P[:, 2, 2] = 1.0
-        P[:, 3, 3] = 1.0
+        P[...,:, 1, 1] = 0.5
+        P[...,:, 1, 4] = 0.5
+        P[...,:, 2, 2] = 1.0
+        P[...,:, 3, 3] = 1.0
 
 
 
         return P
 
     def get_R(self, t, mu):
-        R = np.zeros((self.observation_space.n,self.action_space.n))
-
-        # only gets a final reward
-        return R
-
-    def final_R(self,mu):
-        R = np.zeros(self.observation_space.n)
+        R = np.zeros((*mu.shape,self.action_space.n))
 
         # Rock loses to Paper and wins against scissor
-        R[1] = - mu[2] + 3*mu[3]
-        # Paper loses to Scissor and wins against rock
-        R[2] = - mu[3] + (mu[1] + mu[4])
-        # Scissor loses to Rock and wins against paper
-        R[3] = - (mu[1]+mu[4]) + mu[2]
-
-        #Lose state rock: loses to Paper but does not win
-        R[4] = -mu[2]
+        R[...,1,:] = - 10 * mu[...,2] + mu[...,3]
+        # Paper loses to Scissor
+        R[...,2,:] = -10* mu[...,3] + 10 * mu[...,1]
+        # Scissor loses to Rock
+        R[...,3,:] = - mu[...,1] + 10* mu[...,2]
 
         return R
+
+    # def final_R(self,mu):
+    #     R = np.zeros(self.observation_space.n)
+    #
+    #     # Rock loses to Paper and wins against scissor
+    #     R[1] = - mu[2] + 3*mu[3]
+    #     # Paper loses to Scissor and wins against rock
+    #     R[2] = - mu[3] + (mu[1] + mu[4])
+    #     # Scissor loses to Rock and wins against paper
+    #     R[3] = - (mu[1]+mu[4]) + mu[2]
+    #
+    #     #Lose state rock: loses to Paper but does not win
+    #     R[4] = -mu[2]
+    #
+    #     return R

@@ -36,39 +36,41 @@ class A2_MDP(FastMARLEnv):
 
     def get_P(self, t, mu):
         P = np.zeros((self.action_space.n, self.observation_space.n, self.observation_space.n))
+        if mu.ndim == 2:
+            P = np.zeros((mu.shape[0],self.action_space.n, self.observation_space.n, self.observation_space.n))
 
         # Action 0: Go to state 1
-        P[0, 0, 0] = 1.0
-        P[0,1,0] = 1.0
-        P[0,2,0] = 1.0
-        P[0, 3, 0] = 1.0
+        P[...,0, 0, 0] = 1.0
+        P[...,0,1,0] = 1.0
+        P[...,0,2,0] = 1.0
+        P[...,0, 3, 0] = 1.0
 
 
         #Action 1: Go forward
-        P[1, 0, 1] = 1.0
-        P[1, 1, 2] = 1.0
-        P[1, 2, 3] = 1.0
-        P[1, 3, 0] = 1.0
+        P[...,1, 0, 1] = 1.0
+        P[...,1, 1, 2] = 1.0
+        P[...,1, 2, 3] = 1.0
+        P[...,1, 3, 0] = 1.0
 
         return P
 
     def get_R(self, t, mu):
-        R = np.zeros((self.observation_space.n,self.action_space.n))
+        R = np.zeros((*mu.shape,self.action_space.n))
 
 
-        R[0] = 1
-        R[1] = 0
-        R[2] = 0
-        R[3] = 5
-
-        return R
-
-    def final_R(self,mu):
-        R = np.zeros(self.observation_space.n)
-
-        R[0] = 1
-        R[1] = 0
-        R[2] = 0
-        R[3] = 5
+        R[...,0,:] = 1
+        R[...,1,:] = 0
+        R[...,2,:] = 0
+        R[...,3,:] = 5
 
         return R
+
+    # def final_R(self,mu):
+    #     R = np.zeros(self.observation_space.n)
+    #
+    #     R[0] = 1
+    #     R[1] = 0
+    #     R[2] = 0
+    #     R[3] = 5
+    #
+    #     return R

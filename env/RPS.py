@@ -124,6 +124,7 @@ class RPS(FastMARLEnv):
         return R
 
     #TODO:  For now, dont use final rewards, because they are not included in lookahead q functions
+
     # def final_R(self,mu):
     #     R = np.zeros(self.observation_space.n)
     #
