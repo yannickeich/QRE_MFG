@@ -15,14 +15,13 @@ if __name__ == '__main__':
         for game in ['random',]:
             for temperature in np.exp(np.linspace(-0.5,4.5,20)):
                 p = subprocess.Popen(['python',
-                                      '../.././RH_main_fp.py',
+                                      '../.././parallel_RH_main_fp.py',
                                       f'--game={game}',
                                       f'--fp_iterations={1000}',
                                       f'--method={"pFP"}',
                                       f'--variant={"QRE"}',
                                       f'--tau={tau}',
                                       f'--temperature={temperature}',
-                                      f'--lookahead',
                                       ])
                 child_processes.append(p)
 

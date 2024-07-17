@@ -180,6 +180,12 @@ if __name__ == '__main__':
     action_probs_final = np.zeros((total_horizon, env.observation_space.n, env.action_space.n))
     mu_final = np.zeros((total_horizon+1, env.observation_space.n))
     mu_final[0] = mu_0
-    # np.save(config['exp_dir'] + f"action_probs.npy", action_probs_compare)
+    for i in range(number_mfgs):
+        mu_final[i+1] = mu_compare_p[i,1]
+        action_probs_final[i] = action_probs_compare_p[i,0]
+    #The last tau actions are taken from one mfg
+    action_probs_final[i:] = action_probs_compare_p[i:]
+    mu_final[i + 1:] = mu_compare_p[i,1:]
+    np.save(config['exp_dir'] + f"action_probs.npy", action_probs_final)
     # np.save(config['exp_dir'] + f"best_response.npy", Q_br)
-    # np.save(config['exp_dir'] + f"mean_field.npy", mu_compare)
+    np.save(config['exp_dir'] + f"mean_field.npy", mu_final)

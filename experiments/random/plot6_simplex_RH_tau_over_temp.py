@@ -120,10 +120,10 @@ def plot():
     #variants = ["RE","QRE","BE"]
     variant = "QRE"
 
-    mf_method = None
-    #mf_method = "RH"
+
+    mf_method = "pRH"
     method = "pFP"
-    lookahead = True
+    lookahead = False
     taus = [1,2,3,4,5]
 
     # same configs as in experiment

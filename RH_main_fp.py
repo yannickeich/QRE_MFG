@@ -23,36 +23,37 @@ if __name__ == '__main__':
     action_probs_final = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
     mu_final = np.zeros((env.time_steps+1, env.observation_space.n))
     mu_final[0] = mu_0
-    for i in range(total_horizon-tau+1):
+    with open(config['exp_dir'] + f"stdout", "w", buffering=1) as fo:
+        for i in range(total_horizon-tau+1):
 
-        #Run MFG process, with time_steps = tau, and the initial condition for the mean field by calling main
-        # p = subprocess.Popen(['python',
-        #                       './main_fp.py',
-        #                       f'--game={game}',
-        #                       f'--fp_iterations={fp_iterations}',
-        #                       f'--method={method}',
-        #                       f'--variant={variant}',
-        #                       f'--tau={tau}',
-        #                       f'--temperature={temperature}',
-        #                       f'--time_steps={tau}',
-        #                       #f'--mu_0={mu_0}'
-        #                       ])
+            #Run MFG process, with time_steps = tau, and the initial condition for the mean field by calling main
+            # p = subprocess.Popen(['python',
+            #                       './main_fp.py',
+            #                       f'--game={game}',
+            #                       f'--fp_iterations={fp_iterations}',
+            #                       f'--method={method}',
+            #                       f'--variant={variant}',
+            #                       f'--tau={tau}',
+            #                       f'--temperature={temperature}',
+            #                       f'--time_steps={tau}',
+            #                       #f'--mu_0={mu_0}'
+            #                       ])
 
-        # Copy of main
-        #Initial
-        env.mu_0 = mu_final[i]
-        env.time_steps = tau
-        Q_0 = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
-        action_probs = get_action_probs_from_Qs(Q_0)
+            # Copy of main
+            #Initial
+            env.mu_0 = mu_final[i]
+            env.time_steps = tau
+            Q_0 = np.zeros((env.time_steps, env.observation_space.n, env.action_space.n))
+            action_probs = get_action_probs_from_Qs(Q_0)
 
-        #For FP
-        sum_action_probs = np.zeros_like(action_probs)
-        mus_avg = get_curr_mf(env, action_probs)
+            #For FP
+            sum_action_probs = np.zeros_like(action_probs)
+            mus_avg = get_curr_mf(env, action_probs)
 
-        beta = 0.95
+            beta = 0.95
 
-        """ Compute the MFG fixed point for all high degree agents """
-        with open(config['exp_dir'] + f"stdout", "w", buffering=1) as fo:
+            """ Compute the MFG fixed point for all high degree agents """
+
             for iteration in range(config['fp_iterations']):
                 if config['method'] == 'pFP':
                     #FP method where the policy gets averaged.
@@ -112,7 +113,7 @@ if __name__ == '__main__':
                 fo.write('\n')
 
                 """Relative Entropy L1-Distance"""
-                Q_sr = find_soft_response(env, mus, temperature=config['temperature'])
+                Q_sr = find_soft_response(env, mu_compare, temperature=config['temperature'])
                 RE_action_probs = get_softmax_action_probs_from_Qs(Q_sr, temperature=config['temperature'])
                 print(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
                 fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs - action_probs_compare).sum(-1).sum(-1).max()}")
@@ -158,14 +159,14 @@ if __name__ == '__main__':
 
 
 
-            action_probs_final[i] = action_probs[0]
-            mu_final[i+1] = mus[1]
+            action_probs_final[i] = action_probs_compare[0]
+            mu_final[i+1] = mu_compare[1]
     #The last tau actions are taken from one mfg
-    action_probs_final[i:] = action_probs[0:]
-    mu_final[i + 1:] = mus[1:]
-    np.save(config['exp_dir'] + f"action_probs.npy", action_probs_compare)
+    action_probs_final[i:] = action_probs_compare[0:]
+    mu_final[i + 1:] = mu_compare[1:]
+    np.save(config['exp_dir'] + f"action_probs.npy", action_probs_final)
     np.save(config['exp_dir'] + f"best_response.npy", Q_br)
-    np.save(config['exp_dir'] + f"mean_field.npy", mu_compare)
+    np.save(config['exp_dir'] + f"mean_field.npy", mu_final)
 
 
 
