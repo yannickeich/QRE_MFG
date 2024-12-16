@@ -1,6 +1,6 @@
 # Bounded Rationality Equilibrium Learning in Mean Field Games
 Accompanying code for the paper "Bounded Rationality Equilibrium Learning in Mean Field Games" by Y. Eich, C. Fabian, K. Cui, and H. Koeppl.
-Proceedings of the AAAI Conference on Artificial Intelligence, 39.
+Proceedings of the AAAI Conference on Artificial Intelligence, 39, 2025.
 
 ### Install Python packages in venv
 ```
