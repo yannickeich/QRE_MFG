@@ -21,22 +21,21 @@ def find(pattern, path):
 
 def plot():
 
-
-    i = 1
-    skip_n = 1
+    skip_n=1
 
     # Same settings as in experiment
-    games = ['RPS',]
-    variants = ["NE","QRE","RE","BE"]
+    games = ['random',]
+    variants = ["NE","BE","QRE","RE"]
     methods = ["pFP"]
-    stationary = False
-    temperature = 0.5
-    iterations = 1000
+    temperature = 1.0
+    iterations = 10000
+
+    #Default settings:
     lookahead = False
     tau = 5
 
     for game in games:
-        clist = itertools.cycle(cycler('color',['purple','blue','red','green']))
+        clist = itertools.cycle(cycler('color',['black','blue','m','red']))
         linestyle_cycler = itertools.cycle(cycler('linestyle', ['-', '--', ':', '-.']))
         fig,(ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
         fig.subplots_adjust(hspace=0.01)
@@ -71,7 +70,7 @@ def plot():
                          alpha=0.7,
                          backgroundcolor='white',
                          ha='left', va='top')
-        ax4.annotate('(' + string.ascii_lowercase[2] + ')',
+        ax4.annotate('(' + string.ascii_lowercase[3] + ')',
                      (0, 0),
                      xytext=(10, +32),
                      xycoords='axes fraction',
@@ -99,7 +98,7 @@ def plot():
                         for i, field in enumerate(fields):
                             if field == 'expl:':
                                 # Save number without comma
-                                plot_vals.append(float(fields[i + 1][:-1]))
+                                plot_vals.append(float(fields[i+1][:-1]))
                 color = clist.__next__()['color']
                 linestyle = linestyle_cycler.__next__()['linestyle']
                 ax1.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
@@ -111,7 +110,7 @@ def plot():
                     for line in fi_lines[:]:
                         fields = line.split(" ")
                         for i, field in enumerate(fields):
-                            if field == 'QRE_l1_distance:':
+                            if field == 'BE_l1_distance:':
                                 # Save number without comma
                                 plot_vals.append(float(fields[i+1][:-1]))
 
@@ -123,7 +122,7 @@ def plot():
                     for line in fi_lines[:]:
                         fields = line.split(" ")
                         for i, field in enumerate(fields):
-                            if field == 'RE_l1_distance:':
+                            if field == 'QRE_l1_distance:':
                                 # Save number without comma
                                 plot_vals.append(float(fields[i+1][:-1]))
 
@@ -135,7 +134,7 @@ def plot():
                     for line in fi_lines[:]:
                         fields = line.split(" ")
                         for i, field in enumerate(fields):
-                            if field == 'BE_l1_distance:':
+                            if field == 'RE_l1_distance:':
                                 # Save number without comma
                                 plot_vals.append(float(fields[i+1][:-1]))
 
@@ -149,9 +148,9 @@ def plot():
         ax4.grid('on')
         plt.xlabel(r'Iterations $k$')
         ax1.set_ylabel(r'$\Delta J(\pi)$')
-        ax2.set_ylabel(r'$\Delta \mathrm{QRE}(\pi)$')
-        ax3.set_ylabel(r'$\Delta \mathrm{RE}(\pi)$')
-        ax4.set_ylabel(r'$\Delta \mathrm{BE}(\pi)$')
+        ax2.set_ylabel(r'$\Delta \mathrm{Q}^*\mathrm{RE}(\pi)$')
+        ax3.set_ylabel(r'$\Delta \mathrm{Q}^\pi\mathrm{RE}(\pi)$')
+        ax4.set_ylabel(r'$\Delta \mathrm{RE}(\pi)$')
 
         plt.xlim([0, len(plot_vals)-1])
 
@@ -160,9 +159,9 @@ def plot():
         ax1.set_xscale('symlog')
 
     """ Finalize plot """
-    plt.gcf().set_size_inches(3.25, 3.25)
+    plt.gcf().set_size_inches(3.25,4)
     plt.tight_layout(w_pad=0.0,h_pad=0.2)
-    #plt.savefig(f'./figures/exp+QRE+RE_small.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/exp1.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
     #plt.savefig(f'./figures/exploitability_without_legend.pdf', bbox_inches = 'tight', transparent = True, pad_inches = 0)
 
     #plt.savefig(f'./figures/exploitability.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)

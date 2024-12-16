@@ -6,7 +6,7 @@ from env.RandomMFG import RandomMFG
 from env.RPS import RPS
 from env.A2_MDP import A2_MDP
 from env.A3_MDP import A3_MDP
-from env.riskRPS import riskRPS
+from archive.riskRPS import riskRPS
 
 
 def parse_args():

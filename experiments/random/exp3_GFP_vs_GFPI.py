@@ -11,9 +11,9 @@ if __name__ == '__main__':
     child_processes = []
 
     iterations = 10000
-    for variant in["QRE","RE","NE","BE"]:
-        for method in ["FPI"]:
-            for temperature in [1.0]:
+    for variant in["QRE"]:
+        for method in ["FPI","pFP"]:
+            for temperature in [0.01,1.0]:
                 for game in ["random"]:
                     p = subprocess.Popen(['python',
                                               '../.././main_fp.py',

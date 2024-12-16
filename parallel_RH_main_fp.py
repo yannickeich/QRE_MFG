@@ -11,6 +11,7 @@ if __name__ == '__main__':
     tau = config['tau']
     env: FastMARLEnv = config['game'](**config)
 
+
     #Get initial condition and horizon from the environment
     mu_0 = env.mu_0
     total_horizon = env.time_steps
@@ -38,7 +39,8 @@ if __name__ == '__main__':
     initial_mu = mu_p[:, 0, :]
     mus_avg_p = get_curr_mf_p(env,initial_mu,action_probs_p)
 
-
+    Q_0_total_horizon = np.zeros((total_horizon, env.observation_space.n, env.action_space.n))
+    action_probs_total_horizon = get_action_probs_from_Qs(Q_0_total_horizon)
     beta = 0.95
     with open(config['exp_dir'] + f"stdout", "w", buffering=1) as fo:
         for iteration in range(config['fp_iterations']):
@@ -91,25 +93,6 @@ if __name__ == '__main__':
                 v_1_p = (initial_mu * Q_br_p.max(axis=-1)[:,0]).sum(-1)
                 v_curr_1_p = (initial_mu*V_pi_p).sum(-1)
 
-                # V_pi_p=[]
-                # Q_pi_p=[]
-                # Q_br_p=[]
-                # Q_sr_p = []
-                # v_1_p=[]
-                # v_curr_1_p=[]
-                # for i in range(number_mfgs):
-                #     """ Evaluate current policy """
-                #     V_pi, Q_pi = eval_curr_reward(env, action_probs_compare_p[i], mu_compare_p[i])
-                #     V_pi_p.append(V_pi)
-                #     Q_pi_p.append(Q_pi)
-                #     """ Evaluate current best response against current average policy """
-                #     Q_br = find_best_response(env, mu_compare_p[i])
-                #     Q_br_p.append(Q_br)
-                #     v_1 = np.vdot(env.mu_0, Q_br.max(axis=-1)[0])
-                #     v_curr_1 = np.vdot(env.mu_0, V_pi)
-                #     v_1_p.append(v_1)
-                #     v_curr_1_p.append(v_curr_1)
-                #     Q_sr_p.append(find_soft_response(env, mus_p[i], temperature=config['temperature']))
 
                 BE_action_probs_p = get_softmax_action_probs_from_Qs(Q_br_p,
                                                                          temperature=config['temperature'])
@@ -138,6 +121,28 @@ if __name__ == '__main__':
                     print(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
                     fo.write(f"{config['exp_dir']} game {i} iteration {iteration}: RE_l1_distance: {np.abs(RE_action_probs_p[i] - action_probs_compare_p[i]).sum(-1).sum(-1).max()}")
                     fo.write("\n")
+
+
+                #Compare the total horizon policy resulting from the combination of the small RH MFGs
+                #Change environment to total environment
+                env.time_steps = total_horizon
+
+                mu_total_horizon = get_curr_mf(env, action_probs_total_horizon)
+                V_pi_total_horizon, Q_pi_total_horizon = eval_curr_reward(env,action_probs_total_horizon,mu_total_horizon)
+                Q_br_total_horizon= find_best_response(env, mu_total_horizon)
+                Q_sr_total_horizon = find_soft_response(env,mu_total_horizon,temperature=config['temperature'])
+                v_1_total_horizon = (env.mu_0 * Q_br_total_horizon.max(axis=-1)[0]).sum(-1)
+                v_curr_1_total_horizon = (env.mu_0*V_pi_total_horizon).sum(-1)
+
+                QRE_action_probs_total_horizon = get_softmax_action_probs_from_Qs(Q_pi_total_horizon,
+                                                                      temperature=config['temperature'])
+                print(
+                    f"{config['exp_dir']} iteration {iteration}: total_QRE_l1_distance: {np.abs(QRE_action_probs_total_horizon - action_probs_total_horizon).sum(-1).sum(-1).max()}")
+                fo.write(
+                    f"{config['exp_dir']} iteration {iteration}: total_QRE_l1_distance: {np.abs(QRE_action_probs_total_horizon - action_probs_total_horizon).sum(-1).sum(-1).max()}")
+                fo.write('\n')
+                #Change back
+                env.time_steps = tau
 
                 ### Average mean_field for FP methods
                 if config['method']=='FP':
@@ -176,16 +181,15 @@ if __name__ == '__main__':
                 # Change the initial mu of each MFG to the second time step mu of the previous MF solution
                 initial_mu[1:] = mu_compare_p[:-1, 1]
 
+                for i in range(number_mfgs):
+                    action_probs_total_horizon[i] = action_probs_compare_p[i, 0]
+                # The last tau actions are taken from one mfg
+                action_probs_total_horizon[i:] = action_probs_compare_p[i:]
 
-    action_probs_final = np.zeros((total_horizon, env.observation_space.n, env.action_space.n))
-    mu_final = np.zeros((total_horizon+1, env.observation_space.n))
-    mu_final[0] = mu_0
-    for i in range(number_mfgs):
-        mu_final[i+1] = mu_compare_p[i,1]
-        action_probs_final[i] = action_probs_compare_p[i,0]
-    #The last tau actions are taken from one mfg
-    action_probs_final[i:] = action_probs_compare_p[i:]
-    mu_final[i + 1:] = mu_compare_p[i,1:]
-    np.save(config['exp_dir'] + f"action_probs.npy", action_probs_final)
+
+
+
+
+    np.save(config['exp_dir'] + f"action_probs.npy", action_probs_total_horizon)
     # np.save(config['exp_dir'] + f"best_response.npy", Q_br)
-    np.save(config['exp_dir'] + f"mean_field.npy", mu_final)
+    np.save(config['exp_dir'] + f"mean_field.npy", mu_total_horizon)

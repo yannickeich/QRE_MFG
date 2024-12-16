@@ -10,19 +10,21 @@ if __name__ == '__main__':
     cores_per_task = 1
     max_tasks = num_cores // cores_per_task
     child_processes = []
-    temperature = np.exp(1.7)
-    for tau in [2]:
-        for game in ['random',]:
-            for variant in ['QRE', "RE", "BE"]:
+    time_steps = 7
+    mu_0 = np.array([1.0,0.0,0.0,0.0])
+
+    for variant in ['QRE',"RE","BE"]:
+        for game in ['RPS',]:
+            for temperature in np.exp(np.linspace(-0.5,4.5,20)):
                 p = subprocess.Popen(['python',
-                                      '../.././RH_main_fp.py',
+                                      '../.././main_fp.py',
                                       f'--game={game}',
                                       f'--fp_iterations={1000}',
                                       f'--method={"pFP"}',
                                       f'--variant={variant}',
-                                      f'--tau={tau}',
                                       f'--temperature={temperature}',
-                                      f'--lookahead',
+                                      f'--time_steps={time_steps}',
+                                      f'--mu_0={mu_0}',
                                       ])
                 child_processes.append(p)
 

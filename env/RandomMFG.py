@@ -2,13 +2,13 @@ import numpy as np
 from gym.spaces import Discrete
 from env.fast_marl import FastMARLEnv
 
-np.random.seed(9551006)
+np.random.seed(95510066)
 class RandomMFG(FastMARLEnv):
     """
     Models the Left Right game.
     """
 
-    def __init__(self, num_states: int = 4, num_actions: int = 2,time_steps: int = 7,mu_0=None,
+    def __init__(self, num_states: int = 100, num_actions: int = 10,time_steps: int = 10,mu_0=None,
                  num_agents: int = 100, **kwargs):
 
         self.num_states = num_states

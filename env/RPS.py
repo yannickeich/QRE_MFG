@@ -8,15 +8,12 @@ class RPS(FastMARLEnv):
     Models the Rock Paper Scissor game.
     """
 
-    def __init__(self, time_steps: int = 5,mu_0 = np.array([1.,0.,0.,0.]),
+    def __init__(self, time_steps: int = 20,mu_0 =np.array([1.0, 0., 0., 0.]),
                  num_agents: int = 100, **kwargs):
 
         # Initial state and a state for rock, paper, scissors each.
         observation_space = Discrete(4)
         action_space = Discrete(3)
-
-        mu_0 = np.array([1.,0.,0.,0.])
-
         super().__init__(observation_space, action_space,
                          time_steps, mu_0, num_agents=num_agents, **kwargs)
 
@@ -115,11 +112,11 @@ class RPS(FastMARLEnv):
         R = np.zeros((*mu.shape,self.action_space.n))
 
         # Rock loses to Paper and wins against scissor
-        R[...,1,:] = - 10 * mu[...,2] + mu[...,3]
+        R[...,1,:] = - 10 * mu[...,2][...,None] + mu[...,3][...,None]
         # Paper loses to Scissor
-        R[...,2,:] = -10* mu[...,3] + 10 * mu[...,1]
+        R[...,2,:] = -10* mu[...,3][...,None] + 10 * mu[...,1][...,None]
         # Scissor loses to Rock
-        R[...,3,:] = - mu[...,1] + 10* mu[...,2]
+        R[...,3,:] = - mu[...,1][...,None] + 10* mu[...,2][...,None]
 
         return R
 

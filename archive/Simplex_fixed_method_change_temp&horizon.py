@@ -12,8 +12,8 @@ if __name__ == '__main__':
     child_processes = []
 
     for tau in [1,2,3,4,5]:
-        for game in ['random',]:
-            for temperature in np.exp(np.linspace(-0.5,4.5,20)):
+        for game in ['RPS',]:
+            for temperature in np.exp(np.linspace(-0.5,4.5,50)):
                 p = subprocess.Popen(['python',
                                       '../.././main_fp.py',
                                       f'--game={game}',

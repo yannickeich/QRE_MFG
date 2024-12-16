@@ -115,16 +115,12 @@ def plot():
     i = 1
     skip_n = 1
 
-    games = ['random',]
+    games = ['RPS',]
     n_actions = 3
-    #variants = ["RE","QRE","BE"]
-    variant = "QRE"
-
-
-    mf_method = "pRH"
+    variants = ["RE","QRE","BE"]
     method = "pFP"
     lookahead = False
-    taus = [1,2,3,4,5]
+    tau = 5
 
     # same configs as in experiment
     temperature_list  = np.exp(np.linspace(-0.5,4.5,20))
@@ -183,12 +179,12 @@ def plot():
         # )
         # subplot.add_line(connector_line)
 
-        plot_values = np.zeros((len(taus),len(temperature_list), n_actions))
-        for i,tau in enumerate(taus):
+        plot_values = np.zeros((len(variants),len(temperature_list), n_actions))
+        for i,variant in enumerate(variants):
 
 
             for j, temperature in enumerate(temperature_list):
-                config = args_parser.generate_config_from_kw(game=game, variant=variant,method=method,temperature=temperature,fp_iterations=fp_iterations,lookahead=lookahead,tau=tau,mf_method=mf_method)
+                config = args_parser.generate_config_from_kw(game=game, variant=variant,method=method,temperature=temperature,fp_iterations=fp_iterations,lookahead=lookahead,tau=tau)
                 files = find('action_probs.npy', config['exp_dir'])
                 action_probs = np.load(files[0])
                 plot_values[i,j] = action_probs[0,0]
@@ -238,7 +234,7 @@ def plot():
     """ Finalize plot """
     #plt.gcf().set_size_inches(10, 8)
     plt.tight_layout(w_pad=0.0)
-   # plt.savefig(f'./figures/simplex.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/exp4.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
    # plt.savefig(f'./figures/simplex.png', bbox_inches='tight', transparent=True, pad_inches=0)
     plt.show()
 

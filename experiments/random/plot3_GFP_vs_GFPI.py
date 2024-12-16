@@ -26,8 +26,8 @@ def plot():
     # Same settings as in experiment
     games = ['random',]
     variants = ["QRE"]
-    methods = ["FPI","FP","expFPv1","expFPv2","pFP"]
-    temperatures = [0.1,1.0]
+    methods = ["FPI","pFP"]
+    temperatures = [0.01,1.0]
     iterations = 10000
 
     #Default settings:
@@ -36,7 +36,7 @@ def plot():
 
     for game in games:
         clist = itertools.cycle(cycler('color',['purple','blue','red','green']))
-        linestyle_cycler = itertools.cycle(cycler('linestyle', ['-', '--', ':', '-.']))
+        linestyle_cycler = itertools.cycle(cycler('linestyle', ['-','--']))
         fig,(ax1) = plt.subplots(1,1,sharex=True)
         fig.subplots_adjust(hspace=0.01)
         ax1.annotate('(' + string.ascii_lowercase[0] + ')',
@@ -52,8 +52,10 @@ def plot():
 
 
         for method in methods:
+            color = clist.__next__()['color']
             for variant in variants:
                 for temperature in temperatures:
+                    linestyle = linestyle_cycler.__next__()['linestyle']
                     config = args_parser.generate_config_from_kw(game=game,method=method, variant=variant,temperature=temperature, softmax=True,fp_iterations=iterations,lookahead=lookahead,tau=tau)
                     files = find('stdout', config['exp_dir'])
 
@@ -67,8 +69,7 @@ def plot():
                                 if field == 'QRE_l1_distance:':
                                     # Save number without comma
                                     plot_vals.append(float(fields[i+1][:-1]))
-                    color = clist.__next__()['color']
-                    linestyle = linestyle_cycler.__next__()['linestyle']
+
                     ax1.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
                              label=variant)
 
@@ -87,9 +88,9 @@ def plot():
         ax1.set_xscale('symlog')
 
     """ Finalize plot """
-    plt.gcf().set_size_inches(3.25, 3.25)
+    plt.gcf().set_size_inches(3.25, 1.5)
     plt.tight_layout(w_pad=0.0,h_pad=0.2)
-    #plt.savefig(f'./figures/exp+QRE+RE_small.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/exp3.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
     #plt.savefig(f'./figures/exploitability_without_legend.pdf', bbox_inches = 'tight', transparent = True, pad_inches = 0)
 
     #plt.savefig(f'./figures/exploitability.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)

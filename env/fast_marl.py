@@ -12,6 +12,10 @@ class FastMARLEnv(ABC):
         self.observation_space = observation_space
         self.action_space = action_space
         self.time_steps = time_steps
+
+        if isinstance(mu_0, str):
+            mu_0 = np.fromstring(mu_0.strip('[]'), sep=' ')
+
         self.mu_0 = mu_0
         self.num_agents = num_agents
 

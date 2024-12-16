@@ -3,7 +3,7 @@ import itertools
 import os
 import plot_configurations
 import string
-import numpy as np
+
 import matplotlib.pyplot as plt
 from cycler import cycler
 
@@ -21,24 +21,23 @@ def find(pattern, path):
 
 def plot():
 
-
-    i = 1
-    skip_n = 1
+    skip_n=1
 
     # Same settings as in experiment
     games = ['RPS',]
-    variant = "QRE"
+    variants = ["NE","BE","QRE","RE"]
     methods = ["pFP"]
-    stationary = False
     temperature = 1.0
-    iterations = 1000
-    lookahead = True
-    taus = np.arange(1,5)
+    iterations = 10000
+
+    #Default settings:
+    lookahead = False
+    tau = 5
 
     for game in games:
-        clist = itertools.cycle(cycler('color',['purple','blue','red','green']))
+        clist = itertools.cycle(cycler('color',['black','blue','m','red']))
         linestyle_cycler = itertools.cycle(cycler('linestyle', ['-', '--', ':', '-.']))
-        fig,(ax1,ax2) = plt.subplots(2,1,sharex=True)
+        fig,(ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
         fig.subplots_adjust(hspace=0.01)
         ax1.annotate('(' + string.ascii_lowercase[0] + ')',
                          (0, 0),
@@ -61,13 +60,32 @@ def plot():
                          alpha=0.7,
                          backgroundcolor='white',
                          ha='left', va='top')
-
+        ax3.annotate('(' + string.ascii_lowercase[2] + ')',
+                         (0, 0),
+                         xytext=(10, +32),
+                         xycoords='axes fraction',
+                         textcoords='offset points',
+                         fontweight='bold',
+                         color='black',
+                         alpha=0.7,
+                         backgroundcolor='white',
+                         ha='left', va='top')
+        ax4.annotate('(' + string.ascii_lowercase[3] + ')',
+                     (0, 0),
+                     xytext=(10, +32),
+                     xycoords='axes fraction',
+                     textcoords='offset points',
+                     fontweight='bold',
+                     color='black',
+                     alpha=0.7,
+                     backgroundcolor='white',
+                     ha='left', va='top')
         # ax1.text(-0.01, 1.06, '(' + string.ascii_lowercase[0] + ')', transform=ax1.transAxes, weight='bold')
         # ax2.text(-0.01, 1.06, '(' + string.ascii_lowercase[1] + ')', transform=ax2.transAxes, weight='bold')
         # ax3.text(-0.01, 1.06, '(' + string.ascii_lowercase[2] + ')', transform=ax3.transAxes, weight='bold')
 
         for method in methods:
-            for tau in taus:
+            for variant in variants:
                 plot_vals = []
 
                 config = args_parser.generate_config_from_kw(game=game,method=method, variant=variant,temperature=temperature, softmax=True,fp_iterations=iterations,lookahead=lookahead,tau=tau)
@@ -92,19 +110,47 @@ def plot():
                     for line in fi_lines[:]:
                         fields = line.split(" ")
                         for i, field in enumerate(fields):
+                            if field == 'BE_l1_distance:':
+                                # Save number without comma
+                                plot_vals.append(float(fields[i+1][:-1]))
+
+                ax2.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
+                             label=variant)
+                plot_vals = []
+                with open(max(files, key=os.path.getctime), 'r') as fi:
+                    fi_lines = fi.readlines()
+                    for line in fi_lines[:]:
+                        fields = line.split(" ")
+                        for i, field in enumerate(fields):
                             if field == 'QRE_l1_distance:':
                                 # Save number without comma
                                 plot_vals.append(float(fields[i+1][:-1]))
-                ax2.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
-                             label=variant)
+
+                ax3.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
+                           label=variant)
+                plot_vals = []
+                with open(max(files, key=os.path.getctime), 'r') as fi:
+                    fi_lines = fi.readlines()
+                    for line in fi_lines[:]:
+                        fields = line.split(" ")
+                        for i, field in enumerate(fields):
+                            if field == 'RE_l1_distance:':
+                                # Save number without comma
+                                plot_vals.append(float(fields[i+1][:-1]))
+
+                ax4.loglog(range(len(plot_vals))[::skip_n], plot_vals[::skip_n], linestyle, color=color,
+                           label=variant)
 
 
         ax1.grid('on')
         ax2.grid('on')
-
+        ax3.grid('on')
+        ax4.grid('on')
         plt.xlabel(r'Iterations $k$')
         ax1.set_ylabel(r'$\Delta J(\pi)$')
-        ax2.set_ylabel(r'$\Delta \mathrm{QRE}(\pi)$')
+        ax2.set_ylabel(r'$\Delta \mathrm{Q}^*\mathrm{RE}(\pi)$')
+        ax3.set_ylabel(r'$\Delta \mathrm{Q}^\pi\mathrm{RE}(\pi)$')
+        ax4.set_ylabel(r'$\Delta \mathrm{RE}(\pi)$')
 
         plt.xlim([0, len(plot_vals)-1])
 
@@ -113,9 +159,9 @@ def plot():
         ax1.set_xscale('symlog')
 
     """ Finalize plot """
-    plt.gcf().set_size_inches(3.25, 3.25)
+    plt.gcf().set_size_inches(3.25, 4)
     plt.tight_layout(w_pad=0.0,h_pad=0.2)
-    #plt.savefig(f'./figures/exp+QRE+RE_small.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+    plt.savefig(f'./figures/exp1.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
     #plt.savefig(f'./figures/exploitability_without_legend.pdf', bbox_inches = 'tight', transparent = True, pad_inches = 0)
 
     #plt.savefig(f'./figures/exploitability.png', bbox_extra_artists=(lgd1,), bbox_inches='tight', transparent=True, pad_inches=0)
